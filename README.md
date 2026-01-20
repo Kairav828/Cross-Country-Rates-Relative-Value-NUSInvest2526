@@ -1,4 +1,4 @@
-# Cross-Country Rates Relative Value (NUS Invest 25/26)
+# Cross-Country Rates Relative Value (NUS Investment Society Quantitative Research Department 25/26 - Fixed Income Team)
 
 ## Overview
 This project develops and implements a macro-conditioned cross-country rates relative value trading framework.
@@ -96,11 +96,11 @@ No black-box price prediction models are used.
 ---
 
 ## Repository Structure
-src/ Modular research and trading code
-NOTEBOOKS/ Reproducible analysis and figures
-report/ Final written strategy report
-DATA/ Cleaned inputs (raw data excluded)
-tests/ Statistical validation checks
+- src/ Modular research and trading code
+- NOTEBOOKS/ Reproducible analysis and figures
+- report/ Final written strategy report
+- DATA/ Cleaned inputs (raw data excluded)
+- tests/ Statistical validation checks
 
 ---
 
