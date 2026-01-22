@@ -10,3 +10,4 @@ yfinance
 pytest
 ipykernel
 jupyterlab
+pyarrow
