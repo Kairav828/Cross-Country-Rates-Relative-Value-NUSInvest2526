@@ -1,0 +1,83 @@
+column,nobs,adf_p,kpss_p,label,transform
+cesi__CESIAUD Index,5921,1.8549038349851505e-10,0.1,I(0) (stationary),level
+cesi__CESIEUR Index,5920,2.913218988938976e-11,0.1,I(0) (stationary),level
+cesi__CESIJPY Index,5921,3.325849074332967e-16,0.1,I(0) (stationary),level
+cesi__CESIUSD Index,5920,2.389580129709645e-14,0.07442511136685752,I(0) (stationary),level
+us_eq__VIX Index,9091,1.7375063964203359e-10,0.0975744222669159,I(0) (stationary),level
+bond_yields__GTAUD10Y Govt,6797,0.3759848341923728,0.01,I(1)-like (non-stationary),level
+bond_yields__GTAUD2Y Govt,6796,0.4956310499159537,0.01,I(1)-like (non-stationary),level
+bond_yields__GTAUD5Y Govt,6796,0.4227306228429456,0.01,I(1)-like (non-stationary),level
+bond_yields__GTCNY10Y Govt,4577,0.44534909729973754,0.01,I(1)-like (non-stationary),level
+bond_yields__GTCNY2Y Govt,4031,0.11603472263889825,0.01,I(1)-like (non-stationary),level
+bond_yields__GTCNY5Y Govt,4748,0.22785957511559474,0.01,I(1)-like (non-stationary),level
+bond_yields__GTEUR10Y Govt,9159,0.1766559803290481,0.01,I(1)-like (non-stationary),level
+bond_yields__GTEUR2Y Govt,9121,0.10747183531495536,0.01,I(1)-like (non-stationary),level
+bond_yields__GTEUR5Y Govt,9135,0.102820232519443,0.01,I(1)-like (non-stationary),level
+bond_yields__GTUSD10Y Govt,9377,0.16416935113776665,0.01,I(1)-like (non-stationary),level
+bond_yields__GTUSD2Y Govt,9374,0.16774549074426615,0.01,I(1)-like (non-stationary),level
+bond_yields__GTUSD5Y Govt,9377,0.15838778334751025,0.01,I(1)-like (non-stationary),level
+dxy__BBDXY Index,5381,0.4965579985038038,0.01,I(1)-like (non-stationary),level
+fx_1m__AUD1M BGN Curncy,9103,0.28697974079076066,0.01,I(1)-like (non-stationary),level
+fx_1m__CNH1M BGN Curncy,3986,0.5112243647586148,0.01,I(1)-like (non-stationary),level
+fx_1m__EUR1M BGN Curncy,7053,0.37228234924522585,0.01,I(1)-like (non-stationary),level
+fx_1m__JPY1M BGN Curncy,9370,0.3449287871344776,0.01,I(1)-like (non-stationary),level
+policyrates__EURR002W Index,6999,0.4428011416820955,0.01,I(1)-like (non-stationary),level
+policyrates__FDTR Index,9294,0.12169462457312091,0.01,I(1)-like (non-stationary),level
+repo__ESTR3MA Index,1535,0.18545776311174567,0.01,I(1)-like (non-stationary),level
+repo__SOFRRATE Index,1936,0.883253120659186,0.01,I(1)-like (non-stationary),level
+us_eq__SPX Index,9067,1.0,0.01,I(1)-like (non-stationary),level
+policyrates__CHLRLPR1 Index,77,,,Insufficient data / constant,level
+bond_yields__GTJPY10Y Govt,9079,0.03856290737362679,0.01,Trend-stationary / ambiguous,level
+bond_yields__GTJPY2Y Govt,8213,0.04112527992991094,0.01,Trend-stationary / ambiguous,level
+bond_yields__GTJPY5Y Govt,8988,0.00023253379651577897,0.01,Trend-stationary / ambiguous,level
+cesi__CESICNY Index,5683,7.46702843880395e-11,0.01,Trend-stationary / ambiguous,level
+fx_ov_iv__AUDUSDVON BGN Curncy,5518,1.5634253843186482e-06,0.01,Trend-stationary / ambiguous,level
+fx_ov_iv__EURUSDVON BGN Curncy,6544,0.0017999692307452647,0.01,Trend-stationary / ambiguous,level
+fx_ov_iv__USDCNHVON BGN Curncy,3836,3.079746485100095e-05,0.01,Trend-stationary / ambiguous,level
+fx_ov_iv__USDJPYVON BGN Curncy,6322,1.9062150882259443e-06,0.01,Trend-stationary / ambiguous,level
+move__MOVE Index,9309,0.0006730302367414317,0.01,Trend-stationary / ambiguous,level
+policyrates__BOJDTR Index,5798,1.2638333239383415e-12,0.01,Trend-stationary / ambiguous,level
+policyrates__RBATCTR Index,302,9.97754780593381e-07,0.01,Trend-stationary / ambiguous,level
+repo__CNRE07 Index,5475,0.0008033330449476035,0.01,Trend-stationary / ambiguous,level
+repo__MUTKCALM Index,8155,1.219907061172367e-10,0.01,Trend-stationary / ambiguous,level
+bond_yields__GTAUD10Y Govt,6686,0.0,0.1,I(0) (stationary),diff
+bond_yields__GTAUD2Y Govt,6684,0.0,0.1,I(0) (stationary),diff
+bond_yields__GTAUD5Y Govt,6684,2.6608154434425283e-24,0.1,I(0) (stationary),diff
+bond_yields__GTCNY10Y Govt,4365,1.2769613868807763e-19,0.1,I(0) (stationary),diff
+bond_yields__GTCNY2Y Govt,3744,1.344259391481652e-21,0.1,I(0) (stationary),diff
+bond_yields__GTCNY5Y Govt,4511,4.347601549194023e-28,0.1,I(0) (stationary),diff
+bond_yields__GTJPY10Y Govt,8863,0.0,0.05495363256467248,I(0) (stationary),diff
+bond_yields__GTUSD10Y Govt,9260,0.0,0.1,I(0) (stationary),diff
+bond_yields__GTUSD2Y Govt,9254,0.0,0.1,I(0) (stationary),diff
+bond_yields__GTUSD5Y Govt,9260,0.0,0.1,I(0) (stationary),diff
+cesi__CESIAUD Index,5748,0.0,0.1,I(0) (stationary),diff
+cesi__CESICNY Index,5530,1.1076307490869598e-27,0.1,I(0) (stationary),diff
+cesi__CESIEUR Index,5748,1.4881541140974206e-23,0.1,I(0) (stationary),diff
+cesi__CESIJPY Index,5748,0.0,0.1,I(0) (stationary),diff
+cesi__CESIUSD Index,5746,2.362374483623585e-22,0.1,I(0) (stationary),diff
+dxy__BBDXY Index,5186,0.0,0.1,I(0) (stationary),diff
+fx_1m__AUD1M BGN Curncy,8798,4.4514120147043097e-29,0.1,I(0) (stationary),diff
+fx_1m__CNH1M BGN Curncy,3885,8.922129362445168e-17,0.1,I(0) (stationary),diff
+fx_1m__EUR1M BGN Curncy,6948,0.0,0.1,I(0) (stationary),diff
+fx_1m__JPY1M BGN Curncy,9252,0.0,0.1,I(0) (stationary),diff
+fx_ov_iv__AUDUSDVON BGN Curncy,5171,2.6093990741306197e-24,0.1,I(0) (stationary),diff
+fx_ov_iv__EURUSDVON BGN Curncy,6075,2.1815789950914226e-30,0.07444473527544837,I(0) (stationary),diff
+move__MOVE Index,9131,0.0,0.1,I(0) (stationary),diff
+policyrates__BOJDTR Index,5090,0.0,0.057098047523643204,I(0) (stationary),diff
+policyrates__EURR002W Index,6856,5.58278806137474e-14,0.0987929360297854,I(0) (stationary),diff
+repo__CNRE07 Index,5320,2.8870214637265736e-29,0.1,I(0) (stationary),diff
+repo__SOFRRATE Index,1812,2.0323539964288765e-28,0.07047043069912774,I(0) (stationary),diff
+us_eq__VIX Index,8701,0.0,0.1,I(0) (stationary),diff
+repo__ESTR3MA Index,1477,0.562263815658311,0.01,I(1)-like (non-stationary),diff
+policyrates__CHLRLPR1 Index,0,,,Insufficient data / constant,diff
+policyrates__RBATCTR Index,0,,,Insufficient data / constant,diff
+bond_yields__GTEUR10Y Govt,8998,0.0,0.04942243836859405,Trend-stationary / ambiguous,diff
+bond_yields__GTEUR2Y Govt,8952,0.0,0.016173507718805314,Trend-stationary / ambiguous,diff
+bond_yields__GTEUR5Y Govt,8970,0.0,0.048854927759554474,Trend-stationary / ambiguous,diff
+bond_yields__GTJPY2Y Govt,8028,1.910329367848537e-25,0.016696536041294417,Trend-stationary / ambiguous,diff
+bond_yields__GTJPY5Y Govt,8783,3.5525345621682695e-29,0.01,Trend-stationary / ambiguous,diff
+fx_ov_iv__USDCNHVON BGN Curncy,3719,1.499403668140886e-26,0.023288312302196676,Trend-stationary / ambiguous,diff
+fx_ov_iv__USDJPYVON BGN Curncy,5795,3.736742537186145e-25,0.021087228029624414,Trend-stationary / ambiguous,diff
+policyrates__FDTR Index,9094,1.947936388324336e-16,0.01,Trend-stationary / ambiguous,diff
+repo__MUTKCALM Index,7692,0.0,0.01,Trend-stationary / ambiguous,diff
+us_eq__SPX Index,8653,6.680920020117142e-29,0.01,Trend-stationary / ambiguous,diff
