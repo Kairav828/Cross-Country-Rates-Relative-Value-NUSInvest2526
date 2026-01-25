@@ -12,7 +12,7 @@ This document defines the **statistical validity framework** for all regressions
 ### 1.1 Core Principle
 **OLS regression assumes both dependent and independent variables are stationary (I(0))**, unless cointegration applies.
 
-I(0) -  Integrated of order 0: It means that the series does NOT need differencing to become stationary
+**I(0)** – integrated of order 0: It means that the series does NOT need differencing to become stationary
 
 ### 1.2 Classification Rules
 Based on ADF and KPSS tests (see [../results/stationarity_tests.csv](../results/stationarity_tests.csv)):
