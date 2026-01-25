@@ -299,8 +299,6 @@ This checklist is **mandatory** for:
 
 **Peer review requirement**: Another team member must verify compliance before results are finalized.
 
-**Interview-ready criterion**: You must be able to defend why each variable is in the form it is (level vs change, raw vs normalized) and what diagnostics were run.
-
 ---
 
 ## References
