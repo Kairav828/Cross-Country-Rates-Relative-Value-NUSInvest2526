@@ -171,7 +171,7 @@ Seasonality must be modeled if:
 | **Strong seasonal variance** | Estimate **regime-conditional models** (year-end vs rest) OR use rolling windows that avoid Dec–Jan |
 | **Repo/funding seasonality** | Normalize repo spreads by within-month deviation |
 
-**REQUIRED**: Document decision - state whether seasonality was tested and how it was handled (see `results/seasonality_summary.md`).
+**REQUIRED**: Document decision - state whether seasonality was tested and how it was handled in your analysis notes or project documentation.
 
 ---
 
