@@ -15,7 +15,7 @@ This document defines the **statistical validity framework** for all regressions
 I(0) -  Integrated of order 0: It means that the series does NOT need differencing to become stationary
 
 ### 1.2 Classification Rules
-Based on ADF and KPSS tests (see [results/stationarity_tests.csv](results/stationarity_tests.csv)):
+Based on ADF and KPSS tests (see [../results/stationarity_tests.csv](../results/stationarity_tests.csv)):
 
 - **I(0) — Stationary**: ADF p < 0.05 AND KPSS p > 0.05
   - Safe to use in OLS directly
