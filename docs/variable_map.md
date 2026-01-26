@@ -2,6 +2,9 @@
 
 This table documents what each series represents, how it is treated (levels vs changes), and how it is used in the strategy pipeline.
 
+## Note
+All downstream analyses (correlations, PCA, clustering, regressions) must enforce variable usage strictly according to results/stationarity_matrix.csv and its recommended_form column.
+
 | column                         | dataset     | category                   | level_vs_change   | intended_use                                                   | notes                           |
 |:-------------------------------|:------------|:---------------------------|:------------------|:---------------------------------------------------------------|:--------------------------------|
 | bond_yields__GTAUD10Y Govt     | bond_yields | Core market (rates)        | level (yields)    | Cointegration (levels); changes for correlation/PCA/clustering |                                 |
