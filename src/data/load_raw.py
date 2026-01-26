@@ -5,7 +5,9 @@ Function to load and use raw data
 import pandas as pd
 from pathlib import Path
 
-RAW_DIR = Path("DATA/raw")
+# Resolve path relative to this file to be CWD-independent
+# src/data/load_raw.py -> src/data -> src -> project_root -> DATA/raw
+RAW_DIR = Path(__file__).resolve().parents[2] / "DATA" / "raw"
 
 def _read_bbg_csv(path: Path) -> pd.DataFrame:
     """
