@@ -1,3 +1,6 @@
+# NOTE: This is a visual diagnostic only.
+# No statistical inference or stationarity assumptions are enforced here.
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
