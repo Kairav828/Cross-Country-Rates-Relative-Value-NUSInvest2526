@@ -1,0 +1,42 @@
+column,level_stationarity,level_adf_p,level_kpss_p,diff_stationarity,recommended_form
+cesi_CESIAUD Index,I(0) (stationary),6.324656533517222e-12,0.1,I(0) (stationary),Level
+cesi_CESIEUR Index,I(0) (stationary),1.1508980039031655e-10,0.1,I(0) (stationary),Level
+cesi_CESIJPY Index,I(0) (stationary),2.3877627081593535e-15,0.1,I(0) (stationary),Level
+cesi_CESIUSD Index,I(0) (stationary),8.912937140335515e-15,0.07660108523520831,I(0) (stationary),Level
+us_eq_VIX Index,I(0) (stationary),2.14970672142991e-10,0.09463110298949501,I(0) (stationary),Level
+bond_yields_GTAUD10Y Govt,I(1)-like (non-stationary),0.38149112400854845,0.01,I(0) (stationary),Diff
+bond_yields_GTAUD2Y Govt,I(1)-like (non-stationary),0.4972290131272766,0.01,I(0) (stationary),Diff
+bond_yields_GTAUD5Y Govt,I(1)-like (non-stationary),0.4249527322913575,0.01,I(0) (stationary),Diff
+bond_yields_GTCNY10Y Govt,I(1)-like (non-stationary),0.5169723714478983,0.01,I(0) (stationary),Diff
+bond_yields_GTCNY2Y Govt,I(1)-like (non-stationary),0.11360887060092306,0.01,I(0) (stationary),Diff
+bond_yields_GTCNY5Y Govt,I(1)-like (non-stationary),0.19617195517861213,0.01,I(0) (stationary),Diff
+bond_yields_GTEUR10Y Govt,I(1)-like (non-stationary),0.18482335907825947,0.01,I(0) (stationary),Diff
+bond_yields_GTEUR2Y Govt,I(1)-like (non-stationary),0.1208212171138317,0.01,I(0) (stationary),Diff
+bond_yields_GTEUR5Y Govt,I(1)-like (non-stationary),0.12858996721497862,0.01,I(0) (stationary),Diff
+bond_yields_GTJPY2Y Govt,I(1)-like (non-stationary),0.09739202701275912,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+bond_yields_GTUSD10Y Govt,I(1)-like (non-stationary),0.16386045050354403,0.01,I(0) (stationary),Diff
+bond_yields_GTUSD2Y Govt,I(1)-like (non-stationary),0.1681752693647493,0.01,I(0) (stationary),Diff
+bond_yields_GTUSD5Y Govt,I(1)-like (non-stationary),0.15963301354472875,0.01,I(0) (stationary),Diff
+dxy_BBDXY Index,I(1)-like (non-stationary),0.4692604449032396,0.01,I(0) (stationary),Diff
+fx_1m_AUD1M BGN Curncy,I(1)-like (non-stationary),0.2650117556759981,0.01,I(0) (stationary),Diff
+fx_1m_CNH1M BGN Curncy,I(1)-like (non-stationary),0.4995835385440883,0.01,I(0) (stationary),Diff
+fx_1m_EUR1M BGN Curncy,I(1)-like (non-stationary),0.3710202295670722,0.01,I(0) (stationary),Diff
+fx_1m_JPY1M BGN Curncy,I(1)-like (non-stationary),0.34292392446854775,0.01,I(0) (stationary),Diff
+policyrates_BOJDTR Index,I(1)-like (non-stationary),0.06198039145179943,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+policyrates_CHLRLPR1 Index,I(1)-like (non-stationary),0.8210615875744844,0.01,I(0) (stationary),Diff
+policyrates_EURR002W Index,I(1)-like (non-stationary),0.439428376175798,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+policyrates_FDTR Index,I(1)-like (non-stationary),0.12371619719051097,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+repo_ESTR3MA Index,I(1)-like (non-stationary),0.17985366475046777,0.01,I(1)-like (non-stationary),Ambiguous - Inspect further
+repo_SOFRRATE Index,I(1)-like (non-stationary),0.8818121549222918,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+us_eq_SPX Index,I(1)-like (non-stationary),1.0,0.01,I(0) (stationary),Diff
+bond_yields_GTJPY10Y Govt,Trend-stationary / ambiguous,0.03315354212795218,0.01,I(0) (stationary),Diff
+bond_yields_GTJPY5Y Govt,Trend-stationary / ambiguous,0.00018968591829257475,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+cesi_CESICNY Index,Trend-stationary / ambiguous,7.161115249847842e-11,0.01,I(0) (stationary),Diff
+fx_ov_iv_AUDUSDVON BGN Curncy,Trend-stationary / ambiguous,4.284362606374481e-08,0.01,I(0) (stationary),Diff
+fx_ov_iv_EURUSDVON BGN Curncy,Trend-stationary / ambiguous,0.0015113190625190977,0.01,I(0) (stationary),Diff
+fx_ov_iv_USDCNHVON BGN Curncy,Trend-stationary / ambiguous,3.210849448513862e-05,0.01,I(0) (stationary),Diff
+fx_ov_iv_USDJPYVON BGN Curncy,Trend-stationary / ambiguous,2.295507558918988e-07,0.01,I(0) (stationary),Diff
+move_MOVE Index,Trend-stationary / ambiguous,0.0007103605106767343,0.01,I(0) (stationary),Diff
+policyrates_RBATCTR Index,Trend-stationary / ambiguous,6.192716656425224e-07,0.01,Trend-stationary / ambiguous,Ambiguous - Inspect further
+repo_CNRE07 Index,Trend-stationary / ambiguous,0.0008639033135188895,0.01,I(0) (stationary),Diff
+repo_MUTKCALM Index,Trend-stationary / ambiguous,3.9610425153861753e-10,0.01,I(0) (stationary),Diff

@@ -27,7 +27,7 @@ It answers 4 questions:
 - **notes**: short interpretation if the ticker isn’t obvious.
 
 ## Why this matters
-This prevents the classic quant-project failure mode:
+This prevents:
 - mixing levels/changes incorrectly,
 - treating a “relative value” trade as a hidden duration bet,
 - or claiming a regime story without documenting what drives it.
