@@ -1,27 +1,48 @@
 # Seasonality Detection Summary
 
 ## 1. Conclusion
-* **Verdict:** Seasonality is **Weak** across both Funding and Core Markets.
-* **Key Finding:** Volatility is driven by **Regimes** (e.g., 2022 Inflation) and **Idiosyncratic Shocks** (e.g., Sept 2019 Repo), not by recurring calendar months.
-* **Action:** * **No Month-Dummy Variables:** We will NOT include month indicators in the model.
-    * **Outlier Filtering:** We must tag/exclude the **September 2019** period in the Repo model to prevent it from skewing the "normal" spread baseline.
 
-## 2. Evidence from Heatmaps
+**Verdict:** Seasonality is weak across both Funding and Core Markets.
 
-### A. USD Funding Stress (Repo / SOFR)
-* **Visual Observation:** The heatmap is predominantly blue (low vol) with a single, massive red anomaly in **September 2019**.
-* **Interpretation:** This corresponds to the 2019 Overnight Repo Crisis (liquidity crunch).
-* **Seasonality Check:** Contrary to the "Year-End Turn" hypothesis, the December column (Month 12) is relatively calm in this dataset. The risk is **event-driven**, not seasonal.
+**Key Finding:** Volatility is primarily driven by policy regimes (e.g., 2022 inflation/hiking) and idiosyncratic shocks (e.g., Sept 2019 repo), rather than recurring calendar months.
 
-### B. Bond Yields (US Govt 2Y)
-* **Visual Observation:** The heatmap shows **horizontal bands** rather than vertical stripes.
-    * **2008 & 2022:** Higher volatility (lighter colors/red spots) across most months.
-    * **2012–2020:** Deep blue bands indicating the "Low Volatility / QE" regime.
-* **Interpretation:** Volatility is determined by the macroeconomic environment of the *year*, not the specific *month*.
-* **Statistical Implication:** "Year" or "Regime" is a predictive feature; "Month" is not.
+**Action:**
+- **No Month-Dummy Variables:** We will not include month indicators in the regression model as the F-tests failed to show statistical significance (p < 0.05).
+- **Outlier Filtering:** We must surgically exclude the September 2019 (Repo Crisis) and March 2020 (COVID-19) periods to prevent these one-off structural breaks from skewing the baseline volatility.
 
+---
+
+## 2. Evidence from Heatmaps & Statistics
+
+| Series                  | YE Vol Ratio (Dec/Jan vs Rest) | F-Test p-value | Verdict |
+|-------------------------|--------------------------------|----------------|---------|
+| USD Funding (Repo)      | 1.46x                          | 0.8122         | WEAK    |
+| Bond Yields (US 10Y)    | 0.95x                          | 0.2576         | NONE    |
+| Market Stress (MOVE)    | 1.01x                          | 0.3879         | NONE    |
+
+
+### A. USD Funding Stress (Repo)
+
+- **Visual Observation:** After removing the massive anomalies of 2019 and 2020, the heatmap reveals a subtle pattern of elevated volatility during the Dec/Jan window.
+- **Statistical Reality:** The Year-End Volatility Ratio is 1.46x, confirming that balance sheet window-dressing creates a distinct liquidity constraint.
+- **Interpretation:** While the “Year-End Turn” is economically real, the high F-test p-value (0.8122) indicates that over a 10-year sample, this seasonality is overshadowed by broader monetary policy regimes. It is a risk factor, but not a dominant predictive feature.
+
+### B. Bond Yields (US Govt 10Y)
+
+- **Visual Observation:** The heatmap displays horizontal bands rather than vertical stripes, indicating that volatility persists for entire years rather than specific months.
+- **2008 & 2022:** Persistent high volatility (lighter colors) across all months.
+- **2012–2020:** Deep blue bands indicating the “Low Volatility / QE” regime.
+- **Statistical Reality:** The Year-End Volatility Ratio is 0.95x, effectively near parity.
+- **Interpretation:** Volatility is determined by the macroeconomic environment of the regime, not the calendar month.
+
+---
 
 ## 3. Implication
-* **Modeling Choice:** Overall seasonality is relatively weak and we will proceed with the the regime conditioned models 
 
-* **Data Handling:** The Sept 2019 Repo data point is a structural break and will be treated as an outlier in the Relative Value training set.
+**Modeling Choice:** Given that seasonality is statistically weak compared to macro drivers, we will proceed with regime-conditioned models (focusing on volatility clusters) rather than calendar-based models.
+
+**Tactical Note:** While excluded from the core model, the Year-End Turn (1.46x vol) should be treated as a risk overlay for short-term trading during the Dec 15–Jan 15 window.
+
+
+
+
