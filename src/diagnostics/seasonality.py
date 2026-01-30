@@ -1,111 +1,139 @@
+"""
+Purpose:
+--------
+Provide formal statistical diagnostics for detecting seasonality in rate changes
+and stress indicators.
+
+Why this exists:
+----------------
+Seasonality (e.g. year-end funding stress, balance-sheet constraints, repo effects)
+can distort volatility estimates and invalidate mean-reversion assumptions if not
+explicitly tested.
+
+Week 1 seasonality checks implemented:
+1) Year-end (Dec–Jan) vs rest-of-year variance test (Levene)
+2) Variance comparison across calendar months (Levene across monthly groups)
+3) Month-dummy regression on volatility proxy |Δx| (joint F-test)
+
+Outputs are used to make an explicit modeling decision:
+- 'model_explicitly'  → seasonality must be handled or conditioned on
+- 'ignore'            → no material seasonality detected
+"""
+
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
-from scipy.stats import zscore
 
+def _safe(series: pd.Series) -> pd.Series:
+    s = series.dropna()
+    return s[s.index.notnull()]
 
+def year_end_test(series: pd.Series):
+    s = _safe(series)
+    df = s.to_frame("x")
+    df["month"] = df.index.month
+    ye = df[df["month"].isin([12, 1])]["x"]
+    rest = df[~df["month"].isin([12, 1])]["x"]
 
-def analyze_seasonality(series_diff, name="Series"):
+    if len(ye) < 2 or len(rest) < 2:
+        return {"ye_ratio": np.nan, "ye_p": 1.0, "ye_sig": False}
 
-    # FIX 6:  Outlier Removal 
-    #zscore > 6
-    clean_series = series_diff.copy()
-    z_scores = np.abs(zscore(clean_series, nan_policy='omit'))
-    
-    # Identify and remove outliers (preserving index for timing)
-    outliers = z_scores > 6
-    if outliers.sum() > 0:
-        print(f"[{name}] Removed {outliers.sum()} outliers (Z-score > 6)")
-        clean_series = clean_series[~outliers]
+    _, p = stats.levene(ye, rest)
+    ratio = ye.std() / rest.std() if rest.std() != 0 else np.nan
+    return {"ye_ratio": ratio, "ye_p": p, "ye_sig": p < 0.05}
 
-    # FIX #3: Precise Year-End Definition 
-    # "Use Dec 15 – Jan 15 window"
-    # Create a boolean mask for the 'Turn' period
-    day = clean_series.index.day
-    month = clean_series.index.month
-    
-    # Turn = (Dec & Day >= 15) OR (Jan & Day <= 15)
-    is_turn = ((month == 12) & (day >= 15)) | ((month == 1) & (day <= 15))
-    
-    # Calculate Volatility Ratio
-    vol_turn = clean_series[is_turn].std()
-    vol_rest = clean_series[~is_turn].std()
-    
-    # Avoid division by zero
-    ye_ratio = vol_turn / vol_rest if vol_rest != 0 else 0
+def month_variance_test(series: pd.Series):
+    """
+    Tests whether variance differs across the 12 months (Levene across monthly groups).
+    """
+    s = _safe(series)
+    df = s.to_frame("x")
+    df["month"] = df.index.month
 
-    # FIX 4: Month Dummy Regression 
-    # "regress change in series ~ month_dummies and report p-value"
-    df_reg = clean_series.to_frame(name='val')
-    df_reg['month'] = df_reg.index.month.astype(str) # Categorical
-    
-    # Create dummies (drop_first=True to avoid collinearity)
-    X = pd.get_dummies(df_reg['month'], drop_first=True, dtype=int)
+    groups = [df[df["month"] == m]["x"].values for m in range(1, 13)]
+    groups = [g for g in groups if len(g) >= 2]
+
+    if len(groups) < 3:
+        return {"month_var_p": 1.0, "month_var_sig": False}
+
+    _, p = stats.levene(*groups)
+    return {"month_var_p": p, "month_var_sig": p < 0.05}
+
+def month_dummies_test(series: pd.Series, alpha=0.05):
+    """
+    Regress volatility proxy |Δx| on month dummies and test joint significance (F-test).
+    """
+    s = _safe(series)
+    df = s.to_frame("x")
+    df["month"] = df.index.month
+
+    y = df["x"].abs()
+    X = pd.get_dummies(df["month"], drop_first=True).astype(float)
     X = sm.add_constant(X)
-    Y = df_reg['val']
-    
-    try:
-        model = sm.OLS(Y, X).fit()
-        p_value = model.f_pvalue # The probability that ALL months are zero
-    except Exception as e:
-        print(f"Regression failed for {name}: {e}")
-        p_value = 1.0
 
-    
-    # Significant if F-test passed OR Ratio is huge (> 1.5x)
-    is_significant = (p_value < 0.05) or (ye_ratio > 1.5)
+    if len(y) < X.shape[1] + 5:
+        return {"month_dummy_p": 1.0, "month_dummy_sig": False}
+
+    m = sm.OLS(y.values, X.values).fit()
+
+    k = X.shape[1]
+    R = np.zeros((k - 1, k))
+    for i in range(k - 1):
+        R[i, i + 1] = 1.0
+
+    p = float(m.f_test(R).pvalue)
+    return {"month_dummy_p": p, "month_dummy_sig": p < alpha}
+
+def analyze_seasonality(series: pd.Series, name="Asset"):
+    s = _safe(series)
+    df = s.to_frame("x")
+    df["month"] = df.index.month
+    monthly_vol = df.groupby("month")["x"].std() * np.sqrt(252)
+
+    ye = year_end_test(s)
+    mv = month_variance_test(s)
+    md = month_dummies_test(s)
+
+    flag = ye["ye_sig"] or mv["month_var_sig"] or md["month_dummy_sig"]
+    decision = "model_explicitly" if flag else "ignore"
 
     return {
-        "ye_ratio": ye_ratio,
-        "p_value": p_value,
-        "significant": is_significant,
-        "vol_turn": vol_turn,
-        "vol_rest": vol_rest
+        "name": name,
+        "ye_ratio": ye["ye_ratio"],
+        "ye_p": ye["ye_p"],
+        "month_var_p": mv["month_var_p"],
+        "month_dummy_p": md["month_dummy_p"],
+        "decision": decision,
+        "monthly_vol": monthly_vol,
     }
 
-
-
-
-
-
-def plot_seasonality_heatmap(data_input, regex_filter, title):
-
-    #Change ----------------------------------------------------
-    if isinstance(data_input, pd.Series):
-        
-        target = regex_filter  # Use the filter name as the label
-        data = data_input.dropna().copy()
-    else:
-        # If input is a DataFrame, search for the column
-        cols = [c for c in data_input.columns if regex_filter in c]
-        if not cols:
-            print(f" No columns found for filter: {regex_filter}")
-            return
-        target = cols[0]
-        data = data_input[target].dropna().copy()
-    #Change end ------------------------------------------------
-    if data.empty:
-        print(f" Skipping {title}: No valid data found after dropping NaNs.")
+def plot_seasonality_heatmap(df_changes: pd.DataFrame, contains: str, title: str):
+    cols = [c for c in df_changes.columns if contains in c.lower()]
+    if not cols:
+        print(f"No columns found for filter: {contains}")
         return
-    
-    # Convert to DataFrame for pivoting
-    data = data.to_frame(name=target)
-    data['year'] = data.index.year
-    data['month'] = data.index.month
-    
-    pivot = data.pivot_table(index='year', columns='month', values=target, aggfunc='std')
-    
+
+    col = cols[0]
+    s = df_changes[col].dropna()
+    if s.empty:
+        print(f"Skipping {title}: no data")
+        return
+
+    tmp = s.to_frame(col)
+    tmp["year"] = tmp.index.year
+    tmp["month"] = tmp.index.month
+    pivot = tmp.pivot_table(index="year", columns="month", values=col, aggfunc="std")
+
     if pivot.empty or pivot.isnull().all().all():
-        print(f" Skipping {title}: Not enough data to create heatmap.")
+        print(f"Skipping {title}: insufficient data")
         return
 
     plt.figure(figsize=(10, 6))
-    sns.heatmap(pivot, cmap='coolwarm', annot=False, cbar_kws={'label': 'Monthly Volatility'})
-    plt.title(f"Seasonality Heatmap: {title}")
+    sns.heatmap(pivot, cmap="coolwarm", annot=False, cbar_kws={"label": "Monthly Volatility"})
+    plt.title(f"Seasonality Heatmap: {title} ({col})")
     plt.xlabel("Month")
     plt.ylabel("Year")
     plt.show()
-

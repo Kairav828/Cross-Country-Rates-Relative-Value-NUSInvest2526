@@ -1,3 +1,15 @@
+"""
+Enforces statistical legality of variable usage based on empirical
+stationarity tests (ADF + KPSS).
+
+This guard prevents non-stationary series from entering analyses
+that require I(0) inputs (PCA, clustering, regressions, regimes).
+
+Semantic intent (e.g. 'cointegration-only variables') is documented
+in docs/variable_map.md and enforced by convention.
+"""
+
+
 import pandas as pd
 
 def assert_stationarity_allowed(

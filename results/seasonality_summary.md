@@ -43,6 +43,18 @@
 
 **Tactical Note:** While excluded from the core model, the Year-End Turn (1.46x vol) should be treated as a risk overlay for short-term trading during the Dec 15–Jan 15 window.
 
+## Statistical Tests Table (Week 1 Requirement)
+
+We ran three tests on Δ-series:
+- Year-end window (Dec–Jan) vs rest variance (Levene)
+- Variance differs across months (Levene across monthly groups)
+- Month dummies regression on |Δx| (joint F-test)
+
+Decision rule:
+- If any test significant at 5% → model_explicitly
+- Else → ignore
+
+See: results/seasonality_tests.csv
 
 
 
