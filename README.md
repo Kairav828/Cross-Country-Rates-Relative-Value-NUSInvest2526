@@ -1,5 +1,6 @@
 # Cross-Country Rates Relative Value Trading
-# NUS Investment Society Quantitative Research Department 25/26 - Fixed Income Team
+# NUS Investment Society Quantitative Research Department 25/26 - Fixed Income Team 
+# (Work in Progress!!)
 
 ## Overview
 This project develops and implements a macro-conditioned cross-country rates relative value trading framework.
