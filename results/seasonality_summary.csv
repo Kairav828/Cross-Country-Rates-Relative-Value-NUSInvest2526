@@ -1,0 +1,26 @@
+Series,YE Vol Ratio (Dec/Jan vs Rest),F-Test p-value,Verdict,Handling Rule
+repo__SOFRRATE Index,0.302,0.9957,NONE,Ignore seasonality
+repo__ESTR3MA Index,1.493,0.0017,STRONG,Add month dummies or treat Dec–Jan as separate regime
+repo__MUTKCALM Index,0.213,0.2338,NONE,Ignore seasonality
+repo__CNRE07 Index,1.511,0.9783,WEAK,Ignore in model but treat Dec–Jan as risk overlay
+move__MOVE Index,0.935,0.3331,NONE,Ignore seasonality
+dxy__BBDXY Index,0.949,0.3288,NONE,Ignore seasonality
+bond_yields__GTUSD2Y Govt,0.902,0.2917,NONE,Ignore seasonality
+bond_yields__GTUSD5Y Govt,0.906,0.1747,NONE,Ignore seasonality
+bond_yields__GTUSD10Y Govt,0.939,0.1706,NONE,Ignore seasonality
+bond_yields__GTEUR2Y Govt,0.834,0.3463,NONE,Ignore seasonality
+bond_yields__GTEUR5Y Govt,0.82,0.3634,NONE,Ignore seasonality
+bond_yields__GTEUR10Y Govt,0.889,0.1349,NONE,Ignore seasonality
+bond_yields__GTJPY2Y Govt,0.736,0.8494,NONE,Ignore seasonality
+bond_yields__GTJPY5Y Govt,0.876,0.5899,NONE,Ignore seasonality
+bond_yields__GTJPY10Y Govt,1.02,0.6281,NONE,Ignore seasonality
+bond_yields__GTCNY2Y Govt,2.085,0.1999,WEAK,Ignore in model but treat Dec–Jan as risk overlay
+bond_yields__GTCNY5Y Govt,1.017,0.0696,NONE,Ignore seasonality
+bond_yields__GTCNY10Y Govt,0.809,0.8675,NONE,Ignore seasonality
+bond_yields__GTAUD2Y Govt,0.902,0.4217,NONE,Ignore seasonality
+bond_yields__GTAUD5Y Govt,0.997,0.2055,NONE,Ignore seasonality
+bond_yields__GTAUD10Y Govt,0.938,0.2447,NONE,Ignore seasonality
+fx_ov_iv__EURUSDVON BGN Curncy,1.173,1.0,NONE,Ignore seasonality
+fx_ov_iv__USDJPYVON BGN Curncy,1.103,0.9991,NONE,Ignore seasonality
+fx_ov_iv__USDCNHVON BGN Curncy,1.108,1.0,NONE,Ignore seasonality
+fx_ov_iv__AUDUSDVON BGN Curncy,0.871,0.9985,NONE,Ignore seasonality
