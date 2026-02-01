@@ -1,40 +1,61 @@
 """
-Purpose:
---------
-Provide formal statistical diagnostics for detecting seasonality in rate changes
-and stress indicators.
+Seasonality diagnostics for cross-country rates RV (Week 2: Seasonality & Data Hygiene)
 
-Why this exists:
-----------------
-Seasonality (e.g. year-end funding stress, balance-sheet constraints, repo effects)
-can distort volatility estimates and invalidate mean-reversion assumptions if not
-explicitly tested.
+What we are testing (and why)
+-----------------------------
+We are NOT trying to "predict yields" with calendar effects.
+We are trying to detect whether the calendar introduces systematic distortions that
+can break relative-value assumptions or bias residual-based signals.
 
-Week 1 seasonality checks implemented:
-1) Year-end (Dec–Jan) vs rest-of-year variance test (Levene)
-2) Variance comparison across calendar months (Levene across monthly groups)
-3) Month-dummy regression on volatility proxy |Δx| (joint F-test)
+Two distinct seasonality channels exist:
+1) Mean-shift seasonality:
+   - Do average daily changes differ by month?
+   - Detected via month dummy regression on Δseries.
 
-Outputs are used to make an explicit modeling decision:
-- 'model_explicitly'  → seasonality must be handled or conditioned on
-- 'ignore'            → no material seasonality detected
+2) Volatility / stress seasonality:
+   - Does year-end (Dec–Jan) have materially higher variance than the rest of the year?
+   - Captures funding stress / balance sheet constraints / repo effects.
 
+Why we use month dummy regression (Δseries)
+-------------------------------------------
+We regress Δseries on month indicators to test if the expected change differs by month:
+    Δx_t = α + Σ β_m * D_{m,t} + ε_t
+A joint test of {β_m = 0 for all months} asks:
+    "Does the calendar matter at all for the mean of Δx?"
 
+Why classical OLS F-tests are unsafe here
+-----------------------------------------
+Classical OLS F-tests assume homoskedastic errors (constant variance).
+Rates and funding-linked series are commonly heteroskedastic:
+- Volatility clusters (crisis vs calm)
+- Stress regimes (repo/funding pressure, year-end constraints)
+- Fat tails / leverage points
 
-Week 2 seasonlity decision logic implemented:
-1) Identify cadidate series with seasonality from week 1 (repo, fx vol, move, dxy, yield changes)
-2) For each series, run:
-   - Month dummy regression on Δseries
-   - Joint F-test for seasonality
-   - Dec–Jan vs Feb–Nov variance ratio
-3) Classify seasonality strength (NONE / WEAK / STRONG) based on:
-- STRONG seasonality: F-test p < 0.05 and YE vol ratio > 1.3
-    → "Add month dummies or treat Dec–Jan as separate regime"
-- WEAK seasonality: YE vol ratio > 1.2
-    → "Ignore in model but treat Dec–Jan as risk overlay"
-- NONE: otherwise
-    → "Ignore seasonality"
+If we ignore heteroskedasticity, p-values can be too optimistic and
+we can falsely conclude "seasonality exists" when it is really just
+time-varying volatility.
 
+Fix: HC3 robust covariance + Wald (joint) test
+----------------------------------------------
+We keep OLS coefficients but compute robust standard errors (HC3).
+Then we run a Wald joint test on all month dummy coefficients:
+    H0: β_Feb = β_Mar = ... = β_Dec = 0
+This gives a p-value that remains valid under heteroskedasticity.
+
+Outputs and how they are used
+-----------------------------
+We output an auditable summary used later in pair selection / regime logic:
+- Robust joint test p-value for mean seasonality
+- Dec–Jan vs Rest variance ratio for stress/vol seasonality
+- A classification label:
+    STRONG: robust p < 0.05 AND YE vol ratio > 1.3
+    WEAK:   YE vol ratio > 1.2
+    NONE:   otherwise
+
+Interpretation:
+- STRONG → add month dummies OR treat Dec–Jan as a separate regime.
+- WEAK   → ignore in model but apply a Dec–Jan risk overlay (position sizing / gating).
+- NONE   → ignore seasonality.
 """
 
 import pandas as pd
@@ -161,37 +182,39 @@ def run_seasonality_test(series: pd.Series):
     """
     Runs:
     - Month dummy regression on Δseries
-    - Joint F-test for seasonality
+    - Robust joint Wald test for seasonality (HC3)
     - Dec–Jan vs Feb–Nov variance ratio
 
-    Returns a dict of summary statistics.
+    Returns dict of summary stats.
     """
     series = series.dropna()
-    # FIXED: Bloomberg object dtype - Force numeric
     series = pd.to_numeric(series, errors="coerce").dropna()
-    # Compute daily changes
+
+    # Ensure datetime index
+    if not isinstance(series.index, pd.DatetimeIndex):
+        series.index = pd.to_datetime(series.index)
+
     dseries = series.diff().dropna()
 
-    # Month dummies
     months = dseries.index.month
-    month_dummies = pd.get_dummies(months, prefix="m", drop_first=True)
+    month_dummies = pd.get_dummies(months, prefix="m", drop_first=True).astype(float)
 
-    # Convert dummies to float
-    month_dummies = month_dummies.astype(float)
-
-    # Add intercept
-    X = sm.add_constant(month_dummies)
-
-    # Ensure regression inputs are numeric arrays
+    X = sm.add_constant(month_dummies).astype(float)
     y = dseries.astype(float).values
-    X = X.astype(float).values
 
-    # Run OLS safely
-    model = sm.OLS(y, X).fit()
+    # OLS with robust covariance
+    model = sm.OLS(y, X.values).fit(cov_type="HC3")
 
-    f_pval = model.f_pvalue
+    # Joint test: all month dummy coefficients = 0
+    # X columns = [const, m_2, m_3, ..., m_12] (because drop_first=True)
+    k = X.shape[1]
+    R = np.zeros((k - 1, k))
+    for i in range(1, k):
+        R[i - 1, i] = 1.0
 
-    # Variance split: Dec–Jan vs Feb–Nov
+    wald_res = model.f_test(R)
+    pval = float(wald_res.pvalue)
+
     dec_jan_mask = dseries.index.month.isin([12, 1])
     rest_mask = dseries.index.month.isin([2,3,4,5,6,7,8,9,10,11])
 
@@ -202,16 +225,13 @@ def run_seasonality_test(series: pd.Series):
 
     return {
         "YE Vol Ratio (Dec/Jan vs Rest)": vol_ratio,
-        "F-Test p-value": f_pval
+        "Robust joint test p-value": pval
     }
 
 
 
+
 def classify_seasonality(vol_ratio: float, pval: float):
-    """
-    Assigns NONE / WEAK / STRONG seasonality label
-    based on statistical + economic thresholds.
-    """
 
     if pval < 0.05 and vol_ratio > 1.3:
         return "STRONG", "Add month dummies or treat Dec–Jan as separate regime"
@@ -242,7 +262,7 @@ def run_task2(df: pd.DataFrame, series_list, output_dir="results"):
         stats = run_seasonality_test(df[name])
 
         vol_ratio = stats["YE Vol Ratio (Dec/Jan vs Rest)"]
-        pval = stats["F-Test p-value"]
+        pval = stats["Robust joint test p-value"]
 
         verdict, decision = classify_seasonality(vol_ratio, pval)
 

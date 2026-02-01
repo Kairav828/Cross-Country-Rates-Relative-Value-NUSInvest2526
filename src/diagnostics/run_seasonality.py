@@ -14,7 +14,7 @@ The table is an auditable artifact used to justify:
 
 from pathlib import Path
 import pandas as pd
-from src.diagnostics.seasonality import analyze_seasonality
+from src.diagnostics.seasonality import analyze_seasonality, run_task2
 
 MASTER = Path("DATA/processed/master_df.parquet")
 OUT = Path("results/seasonality_tests.csv")
@@ -29,12 +29,22 @@ def main():
     if not MASTER.exists():
         raise FileNotFoundError("Missing DATA/processed/master_df.parquet. Run build_master first.")
 
+    # Load levels
     df = pd.read_parquet(MASTER).sort_index()
+
+    # Existing pipeline uses Δseries
     df_diff = df.diff()
 
     rows = []
+    selected_cols = set()
+
+    # -----------------------------
+    # Existing auditable table (seasonality_tests.csv)
+    # -----------------------------
     for grp, pred in FILTERS.items():
         cols = [c for c in df_diff.columns if pred(c)]
+        selected_cols.update(cols)
+
         for col in cols:
             res = analyze_seasonality(df_diff[col], name=col)
             rows.append({
@@ -51,6 +61,20 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT, index=False)
     print("Saved:", OUT)
+
+    # -----------------------------
+    # summary artifacts (seasonality_summary.csv + seasonality_note.md)
+    # Uses the SAME selected columns for reproducibility.
+    # run_task2() internally diffs the series, so we pass LEVEL series from df[col].
+    # -----------------------------
+    selected_cols = sorted(selected_cols)
+    if len(selected_cols) > 0:
+        run_task2(df, selected_cols, output_dir="results")
+        print("Saved: results/seasonality_summary.csv")
+        print("Saved: results/seasonality_note.md")
+    else:
+        print("No seasonality columns selected by FILTERS; skipping run_task2().")
+
 
 if __name__ == "__main__":
     main()
