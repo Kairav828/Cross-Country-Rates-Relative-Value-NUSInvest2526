@@ -66,3 +66,121 @@ def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
         out['policy_fed_boj_spread'] = fed - boj
 
     return out
+
+def build_regime_features(
+        df: pd.DataFrame,
+        start_date: str = '2005-01-01',
+        zscore_window: int = 252
+) -> pd.DataFrame:
+    '''
+    Build stationary regime feature matrix for HMM estimation.
+
+    Features:
+    1. move_chg: Change in MOVE index (rates volatility)
+    2. vix_chg: Change in VIX (equity volatility)
+    3. dxy_chg: Change in DXY (USD stress)
+    4. cesi_usd_zscore: Rolling z-score of US economic surprise index
+    5. cesi_eur_zscore: Rolling z-score of EUR economic surprise index
+    6. policy_fed_ecb_spread: Fed Funds - ECB rate
+    7. policy_fed_boj_spread: Fed Funds - BoJ rate
+
+    All features are:
+    - I(0) stationary
+    - Lagged by 1 day (no lookahead bias)
+    - Daily frequency (business days)
+     
+    :param df: Master Dataframe
+    :type df: pd.DataFrame
+    :param start_date: Start date for feature extraction (2005-01-01 as DXY only starts from there)
+    :type start_date: str
+    :param zscore_window: Rolling window for z-score calculation (default to 1 year)
+    :type zscore_window: int
+    :return: Feature matrix with DatetimeIndex, ready for HMM fitting
+    :rtype: DataFrame
+
+    Notes:
+    - CESI substitutes for unavailable inflation data
+    '''
+
+    df = df.loc[start_date:].copy()
+
+    features = pd.DataFrame(index=df.index)
+
+    # MOVE index changes
+    move_col = 'move__MOVE Index'
+    if move_col in df.columns:
+        features['move_chg'] = df[move_col].diff()
+    else:
+        raise KeyError(f"MOVE index not found. Expected column: {move_col}")
+    
+    # VIX changes
+    vix_col = 'us_eq__VIX Index'
+    if vix_col in df.columns:
+        features['vix_chg'] = df[vix_col].diff()
+    else:
+        raise KeyError(f"VIX not found. Expected column: {vix_col}")
+    
+    # DXY changes
+    dxy_col = 'dxy__DXY Index'
+    if dxy_col in df.columns:
+        features['dxy_chg'] = df[dxy_col].diff()
+    else:
+        raise KeyError(f"DXY not found. Expected column: {dxy_col}")
+    
+    # CESI rolling z-scores
+    cesi_usd_col = 'cesi__CESIUSD Index'
+    cesi_eur_col = 'cesi__CESIEUR Index'
+
+    if cesi_usd_col in df.columns:
+        features['cesi_usd_zscore'] = rolling_zscore(
+            df[cesi_usd_col], window=zscore_window
+        )
+    else:
+        raise KeyError(f"CESI USD not found. Expected column: {cesi_usd_col}")
+    
+    if cesi_eur_col in df.columns:
+        features['cesi_eur_zscore'] = rolling_zscore(
+            df[cesi_eur_col], window=zscore_window
+        )
+    else:
+        raise KeyError(f"CESI EUR not found. Expected column: {cesi_eur_col}")
+
+    # Policy Rate Divergence
+    policy_div = compute_policy_divergence(df)
+    features = features.join(policy_div)
+
+    # Lag all features by 1 day to prevent lookahead
+    features = features.shift(1)
+    
+    features = features.dropna()
+    features = features.asfreq('B')
+    
+    return features
+
+def validate_stationarity(features: pd.DataFrame, alpha: float = 0.05) -> pd.DataFrame:
+    '''
+    Docstring for validate_stationarity
+    
+    :param features: Feature matrix from build_regime_features()
+    :type features: pd.DataFrame
+    :param alpha: Significance level for stationarity test
+    :type alpha: float
+    :return: Stationarity test results from the test suite
+    :rtype: DataFrame
+
+    Raises:
+    AssertionError if any feature is non-stationary
+    '''
+    from src.diagnostics.stationarity import run_stationarity_suite
+    
+    results = run_stationarity_suite(features, alpha=alpha)
+    
+    # Check for any non-stationary features
+    non_stationary = results[results['label'].str.contains('I\\(1\\)', case=False, na=False)]
+    
+    if len(non_stationary) > 0:
+        raise AssertionError(
+            f"Non-stationary features detected:\n{non_stationary[['column', 'label']]}"
+        )
+    
+    return results
