@@ -100,3 +100,74 @@ def compute_bic(model: GaussianHMM, features: pd.DataFrame) -> float:
     bic = -2 * log_likelihood + n_params * np.log(n_samples)
     
     return bic
+
+
+def select_best_model(
+        models: dict[int, GaussianHMM],
+        features: pd.DataFrame
+) -> Tuple[GaussianHMM, int, pd.DataFrame]:
+    '''
+    Select best HMM via BIC comparison
+    
+    :param models: Fitted models from fit_hmm_models()
+    :type models: dict[int, GaussianHMM]
+    :param features: Feature matrix
+    :type features: pd.DataFrame
+    :return: Tuple of [Model with lowest BIC, Optimal number of states, BIC comparison table]
+    :rtype: Tuple[Any, int, DataFrame]
+    '''
+
+    bic_results = []
+    
+    for n_states, model in models.items():
+        bic = compute_bic(model, features)
+        log_lik = model.score(features.values)
+        
+        bic_results.append({
+            'n_states': n_states,
+            'log_likelihood': log_lik,
+            'bic': bic
+        })
+    
+    comparison_df = pd.DataFrame(bic_results).sort_values('bic')
+    
+    best_row = comparison_df.iloc[0]
+    best_n_states = int(best_row['n_states'])
+    best_model = models[best_n_states]
+    
+    return best_model, best_n_states, comparison_df
+
+
+def extract_regime_labels(
+        model: GaussianHMM,
+        features: pd.DataFrame
+) -> pd.DataFrame:
+    '''
+    Extract regime probabilities and most likely path from fitted HMM
+    
+    :param model: Fitted HMM
+    :type model: GaussianHMM
+    :param features: Feature matrix with DatetimeIndex
+    :type features: pd.DataFrame
+    :return: Dataframe with columns: regime_prob_0, regime_prob_1, ..., regime_most_likely and index with dates
+    :rtype: DataFrame
+    '''
+
+    X = features.values
+    
+    # Filtered state probabilities (forward algorithm)
+    state_probs = model.predict_proba(X)
+    
+    # Most likely state sequence (Viterbi algorithm)
+    most_likely = model.predict(X)
+    
+    # Build output dataframe
+    out = pd.DataFrame(
+        state_probs,
+        index=features.index,
+        columns=[f'regime_prob_{i}' for i in range(model.n_components)]
+    )
+
+    out['regime_most_likely'] = most_likely
+    
+    return out
