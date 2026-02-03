@@ -37,3 +37,32 @@ def rolling_zscore(s: pd.Series, window: int=252, min_periods: int=126) -> pd.Se
     roll_std = roll_std.replace(0, np.nan)
 
     return (s - roll_mean) / roll_std
+
+def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Compute policy rate divergence metrics.
+
+    Extracts Fed - ECB and Fed - BoJ spreads as indicators of monetary policy fragmentation.
+    
+    :param df: Master dataframe with columns: policyrates__FDTR Index, policyrates__EURR002W Index, policyrates__BOJDTR Index
+    :type df: pd.DataFrame
+    :return: Dataframe with columns: policy_fed_ecb_spread, policy_fed_boj_spread
+    :rtype: DataFrame
+    '''
+
+    out = pd.DataFrame(index=df.index)
+
+    # Fed Funds to ECB Deposit Rate
+    fed = df.get('policyrates__FDTR Index')
+    ecb = df.get('policyrates__EURR002W Index')
+
+    if fed is not None and ecb is not None:
+        out['policy_fed_ecb_spread'] = fed - ecb
+
+    # Fed Funds to BoJ Rate
+    boj = df.get('policyrates__BOJDTR Index')
+
+    if fed is not None and boj is not None:
+        out['policy_fed_boj_spread'] = fed - boj
+
+    return out
