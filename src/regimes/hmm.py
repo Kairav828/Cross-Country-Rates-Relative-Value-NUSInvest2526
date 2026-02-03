@@ -171,3 +171,58 @@ def extract_regime_labels(
     out['regime_most_likely'] = most_likely
     
     return out
+
+
+def interpret_states(
+        model: GaussianHMM,
+        features: pd.DataFrame,
+        labels: pd.DataFrame
+) -> pd.DataFrame:
+    '''
+    Compute average feature values per regime state for economic interpretation
+    
+    :param model: Fitted HMM
+    :type model: GaussianHMM
+    :param features: Feature matrix
+    :type features: pd.DataFrame
+    :param labels: Output from extract_regime_labels() with 'regime_most_likely' column
+    :type labels: pd.DataFrame
+    :return: Rows = states, columns = mean feature values + economic_label
+    :rtype: DataFrame
+    '''
+
+    state_summary = []
+    
+    for state in range(model.n_components):
+        # Get dates assigned to this state
+        mask = labels['regime_most_likely'] == state
+        state_data = features[mask]
+        
+        # Compute mean of each feature in this state
+        means = state_data.mean()
+        
+        summary = {'state': state}
+        summary.update(means.to_dict())
+        
+        # Add derived metrics
+        summary['n_days'] = mask.sum()
+        summary['pct_days'] = 100 * mask.sum() / len(features)
+        
+        # Assign economic label based on feature signature
+        # High MOVE/VIX = stress, High DXY = USD strength, Negative CESI = growth slowdown
+        if means.get('move_chg', 0) > 0.5 and means.get('vix_chg', 0) > 0.5:
+            economic_label = 'Stress / High Volatility'
+        elif means.get('move_chg', 0) < -0.5 and means.get('vix_chg', 0) < -0.5:
+            economic_label = 'Stable / Low Volatility'
+        elif means.get('dxy_chg', 0) > 0.2:
+            economic_label = 'USD Strength / Funding Stress'
+        elif means.get('cesi_usd_zscore', 0) < -0.3:
+            economic_label = 'Growth Slowdown'
+        else:
+            economic_label = 'Mixed / Transitional'
+        
+        summary['economic_label'] = economic_label
+        
+        state_summary.append(summary)
+    
+    return pd.DataFrame(state_summary)
