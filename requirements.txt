@@ -12,3 +12,4 @@ ipykernel
 jupyterlab
 pyarrow
 tabulate
+hmmlearn
