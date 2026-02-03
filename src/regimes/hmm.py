@@ -226,3 +226,42 @@ def interpret_states(
         state_summary.append(summary)
     
     return pd.DataFrame(state_summary)
+
+
+def compute_regime_persistence(labels: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Compute average duration of each regime state.
+    
+    :param labels: Output from extract_regime_labels() with 'regime_most_likely' column
+    :type labels: pd.DataFrame
+    :return: Columns: state, avg_duration_days, min_duration_days, max_duration_days
+    :rtype: DataFrame
+    '''
+    
+    regime_seq = labels['regime_most_likely'].values
+    
+    # Find regime switches
+    switches = np.where(np.diff(regime_seq) != 0)[0] + 1
+    switches = np.concatenate([[0], switches, [len(regime_seq)]])
+    
+    # Compute durations for each spell
+    durations = []
+    
+    for i in range(len(switches) - 1):
+        start = switches[i]
+        end = switches[i + 1]
+        duration = end - start
+        state = regime_seq[start]
+        durations.append({'state': state, 'duration': duration})
+    
+    durations_df = pd.DataFrame(durations)
+    
+    # Aggregate by state
+    persistence = durations_df.groupby('state')['duration'].agg([
+        ('avg_duration_days', 'mean'),
+        ('min_duration_days', 'min'),
+        ('max_duration_days', 'max'),
+        ('n_spells', 'count')
+    ]).reset_index()
+    
+    return persistence
