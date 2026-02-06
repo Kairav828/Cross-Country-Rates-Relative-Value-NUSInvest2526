@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-def rolling_zscore(s: pd.Series, window: int=252, min_periods: int=126) -> pd.Series:
+def rolling_zscore(s: pd.Series, window: int=252, min_periods: int=None) -> pd.Series:
     '''
     Rolling z-score normalization.
     
@@ -30,6 +30,9 @@ def rolling_zscore(s: pd.Series, window: int=252, min_periods: int=126) -> pd.Se
     :return: Z-scored series
     :rtype: Series[Any]
     '''
+
+    if min_periods is None:
+        min_periods = window // 2
 
     roll_mean = s.rolling(window=window, min_periods=min_periods).mean()
     roll_std = s.rolling(window=window, min_periods=min_periods).std()
@@ -121,7 +124,7 @@ def build_regime_features(
         raise KeyError(f"VIX not found. Expected column: {vix_col}")
     
     # DXY changes
-    dxy_col = 'dxy__DXY Index'
+    dxy_col = 'dxy__BBDXY Index'
     if dxy_col in df.columns:
         features['dxy_chg'] = df[dxy_col].diff()
     else:
@@ -152,7 +155,7 @@ def build_regime_features(
     # Lag all features by 1 day to prevent lookahead
     features = features.shift(1)
     
-    features = features.dropna()
+    # features = features.dropna()
     features = features.asfreq('B')
     
     return features
