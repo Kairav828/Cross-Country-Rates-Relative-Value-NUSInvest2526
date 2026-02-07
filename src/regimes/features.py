@@ -41,6 +41,74 @@ def rolling_zscore(s: pd.Series, window: int=252, min_periods: int=None) -> pd.S
 
     return (s - roll_mean) / roll_std
 
+def compute_fx_vol_features(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Compute FX implied volatility features.
+    
+    Extracts overnight ATM implied volatility for major currency pairs
+    as indicators of cross-border funding stress and carry unwind risk.
+    
+    :param df: Master dataframe with columns: fxvol__EURUSDVON BGN Curncy, fxvol__USDJPYVON BGN Curncy
+    :type df: pd.DataFrame
+    :return: DataFrame with columns: eurusd_vol, usdjpy_vol
+    :rtype: DataFrame
+    '''
+    
+    out = pd.DataFrame(index=df.index)
+    
+    # EUR/USD overnight implied vol (funding stress, safe-haven flows)
+    eurusd_vol = df.get('fx_ov_iv__EURUSDVON BGN Curncy')
+    if eurusd_vol is not None:
+        out['eurusd_vol'] = eurusd_vol
+    
+    # USD/JPY overnight implied vol (yen carry unwind risk)
+    usdjpy_vol = df.get('fx_ov_iv__USDJPYVON BGN Curncy')
+    if usdjpy_vol is not None:
+        out['usdjpy_vol'] = usdjpy_vol
+    
+    return out
+
+
+def compute_yield_curve_slopes(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Compute yield curve slope metrics (2s10s).
+    
+    Extracts 2Y-10Y spreads as indicators of growth expectations and recession risk.
+    
+    :param df: Master dataframe with columns: bond__GTUSD2Y Govt, bond__GTUSD10Y Govt, etc.
+    :type df: pd.DataFrame
+    :return: DataFrame with columns: us_2s10s, eur_2s10s, jpy_2s10s
+    :rtype: DataFrame
+    '''
+    
+    out = pd.DataFrame(index=df.index)
+    
+    # US 2s10s slope
+    us_2y = df.get('bond_yields__GTUSD2Y Govt')
+    us_10y = df.get('bond_yields__GTUSD10Y Govt')
+    if us_2y is not None and us_10y is not None:
+        out['us_2s10s'] = us_10y - us_2y
+    
+    # EUR 2s10s slope
+    eur_2y = df.get('bond_yields__GTEUR2Y Govt')
+    eur_10y = df.get('bond_yields__GTEUR10Y Govt')
+    if eur_2y is not None and eur_10y is not None:
+        out['eur_2s10s'] = eur_10y - eur_2y
+    
+    # JPY 2s10s slope
+    jpy_2y = df.get('bond_yields__GTJPY2Y Govt')
+    jpy_10y = df.get('bond_yields__GTJPY10Y Govt')
+    if jpy_2y is not None and jpy_10y is not None:
+        out['jpy_2s10s'] = jpy_10y - jpy_2y
+
+    # AUD 2s10s slope
+    aud_2y = df.get('bond_yields__GTAUD2Y Govt')
+    aud_10y = df.get('bond_yields__GTAUD10Y Govt')
+    if aud_2y is not None and aud_10y is not None:
+        out['aud_2s10s'] = aud_10y - aud_2y
+    
+    return out
+
 def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
     '''
     Compute policy rate divergence metrics.
@@ -73,7 +141,9 @@ def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
 def build_regime_features(
         df: pd.DataFrame,
         start_date: str = '2005-01-01',
-        zscore_window: int = 252
+        zscore_window: int = 252,
+        include_fx_vol: bool = True,
+        include_curve_slopes: bool = True
 ) -> pd.DataFrame:
     '''
     Build stationary regime feature matrix for HMM estimation.
@@ -84,11 +154,14 @@ def build_regime_features(
     3. dxy_chg: Change in DXY (USD stress)
     4. cesi_usd_zscore: Rolling z-score of US economic surprise index
     5. cesi_eur_zscore: Rolling z-score of EUR economic surprise index
-    6. policy_fed_ecb_spread: Fed Funds - ECB rate
-    7. policy_fed_boj_spread: Fed Funds - BoJ rate
+    6. eurusd_vol_chg: Change in EUR/USD overnight implied vol (optional)
+    7. usdjpy_vol_chg: Change in USD/JPY overnight implied vol (optional)
+    8. us_2s10s_chg: Change in US 2Y-10Y spread (optional)
+    9. eur_2s10s_chg: Change in EUR 2Y-10Y spread (optional)
+    10. jpy_2s10s_chg: Change in JPY 2Y-10Y spread (optional)
 
     All features are:
-    - I(0) stationary
+    - I(0) stationary (in changes)
     - Lagged by 1 day (no lookahead bias)
     - Daily frequency (business days)
      
@@ -98,11 +171,17 @@ def build_regime_features(
     :type start_date: str
     :param zscore_window: Rolling window for z-score calculation (default to 1 year)
     :type zscore_window: int
+    :param include_fx_vol: Whether to include FX implied volatility features
+    :type include_fx_vol: bool
+    :param include_curve_slopes: Whether to include yield curve slope features
+    :type include_curve_slopes: bool
     :return: Feature matrix with DatetimeIndex, ready for HMM fitting
     :rtype: DataFrame
 
     Notes:
     - CESI substitutes for unavailable inflation data
+    - FX vol captures cross-border funding stress
+    - Curve slopes capture recession/reflation regime shifts
     '''
 
     df = df.loc[start_date:].copy()
@@ -148,14 +227,25 @@ def build_regime_features(
     else:
         raise KeyError(f"CESI EUR not found. Expected column: {cesi_eur_col}")
 
-    # Policy Rate Divergence
-    policy_div = compute_policy_divergence(df)
-    features = features.join(policy_div)
+    # FX implied volatility features
+    if include_fx_vol:
+        fx_vol = compute_fx_vol_features(df)
+        
+        for col in fx_vol.columns:
+            # Take first differences (changes)
+            features[f'{col}_chg'] = fx_vol[col].diff()
+    
+    # Yield curve slope features
+    if include_curve_slopes:
+        curve_slopes = compute_yield_curve_slopes(df)
+        
+        for col in curve_slopes.columns:
+            # Take first differences (changes in slope)
+            features[f'{col}_chg'] = curve_slopes[col].diff()
 
     # Lag all features by 1 day to prevent lookahead
     features = features.shift(1)
     
-    # features = features.dropna()
     features = features.asfreq('B')
     
     return features
