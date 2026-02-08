@@ -179,102 +179,101 @@ def interpret_states(
         labels: pd.DataFrame
 ) -> pd.DataFrame:
     '''
-    Compute average feature values per regime state for economic interpretation
-    
-    :param model: Fitted HMM
-    :type model: GaussianHMM
-    :param features: Feature matrix
-    :type features: pd.DataFrame
-    :param labels: Output from extract_regime_labels() with 'regime_most_likely' column
-    :type labels: pd.DataFrame
-    :return: Rows = states, columns = mean feature values + economic_label
-    :rtype: DataFrame
+    Compute average feature values per regime state for economic interpretation.
+    Uses relative ranking across states instead of fixed thresholds.
     '''
-
+    
     state_summary = []
     
     for state in range(model.n_components):
-        # Get dates assigned to this state
         mask = labels['regime_most_likely'] == state
         state_data = features[mask]
-        
-        # Compute mean of each feature in this state
         means = state_data.mean()
         
         summary = {'state': state}
         summary.update(means.to_dict())
-        
-        # Add derived metrics
         summary['n_days'] = mask.sum()
         summary['pct_days'] = 100 * mask.sum() / len(features)
         
-        # Assign economic label based on 4-feature signature
-        # Features: move_chg, dxy_chg, macro_surprise (PC1 of CESI), curve_signal (PC1 of 2s10s)
-        
-        move = means.get('move_chg', 0)
-        dxy = means.get('dxy_chg', 0)
-        macro = means.get('macro_surprise', 0)
-        curve = means.get('curve_signal', 0)
-        
-        # Lower threshold for better sensitivity (features are likely already standardized)
-        THRESHOLD = 0.2
-        
-        # PRIORITY 1: VOLATILITY (most regime-defining)
-        # High volatility = crisis/stress regardless of other factors
-        if move > THRESHOLD:
-            if macro < -THRESHOLD:
-                economic_label = 'Crisis / Growth Collapse'  # GFC, COVID
-            elif dxy > THRESHOLD:
-                economic_label = 'Crisis / USD Funding Stress'
-            elif curve > THRESHOLD:
-                economic_label = 'Crisis / Flight-to-Quality'  # March 2023
-            else:
-                economic_label = 'High Volatility / Uncertainty'  # Trump tariffs?
-        
-        # Low volatility = stable/calm
-        elif move < -THRESHOLD:
-            if macro > THRESHOLD and curve > THRESHOLD:
-                economic_label = 'Stable / Reflationary Growth'
-            elif macro > THRESHOLD:
-                economic_label = 'Stable / Positive Surprises'
-            elif curve < -THRESHOLD:
-                economic_label = 'Stable / Late Cycle'
-            else:
-                economic_label = 'Low Volatility / Risk-On'
-        
-        # PRIORITY 2: USD STRESS (moderate volatility)
-        elif dxy > THRESHOLD:
-            if macro < -THRESHOLD:
-                economic_label = 'USD Strength / Growth Divergence'
-            else:
-                economic_label = 'USD Strength / Safe Haven'
-        
-        elif dxy < -THRESHOLD:
-            economic_label = 'USD Weakness / Convergence'
-        
-        # PRIORITY 3: MACRO/CURVE (normal volatility)
-        elif macro > THRESHOLD and curve > THRESHOLD:
-            economic_label = 'Growth Acceleration / Reflation'
-        elif macro < -THRESHOLD and curve < -THRESHOLD:
-            economic_label = 'Slowdown / Flattening'
-        elif macro > THRESHOLD:
-            economic_label = 'Positive Surprises'
-        elif macro < -THRESHOLD:
-            economic_label = 'Negative Surprises'
-        elif curve > THRESHOLD:
-            economic_label = 'Steepening / Easing Expectations'
-        elif curve < -THRESHOLD:
-            economic_label = 'Flattening / Tightening'
-        
-        # FALLBACK
-        else:
-            economic_label = 'Mixed / Transitional'
-        
-        summary['economic_label'] = economic_label
-        
         state_summary.append(summary)
     
-    return pd.DataFrame(state_summary)
+    df_summary = pd.DataFrame(state_summary)
+    
+    # Compute relative rankings for each feature across states
+    # Z-score: (state_mean - mean_across_states) / std_across_states
+    feature_cols = ['move_chg', 'dxy_chg', 'curve_signal', 'macro_surprise']
+    
+    for col in feature_cols:
+        cross_state_mean = df_summary[col].mean()
+        cross_state_std = df_summary[col].std()
+        df_summary[f'{col}_zscore'] = (df_summary[col] - cross_state_mean) / cross_state_std
+    
+    # Now assign labels based on relative z-scores
+    labels_list = []
+    
+    for idx, row in df_summary.iterrows():
+        move_z = row['move_chg_zscore']
+        dxy_z = row['dxy_chg_zscore']
+        macro_z = row['macro_surprise_zscore']
+        curve_z = row['curve_signal_zscore']
+        
+        # Define "high" as >0.5 std above other states, "low" as <-0.5 std
+        THRESHOLD_Z = 0.5
+        
+        # PRIORITY 1: VOLATILITY
+        if move_z > THRESHOLD_Z:
+            # This state has distinctly higher MOVE than other states
+            if macro_z < -THRESHOLD_Z:
+                label = 'Crisis / Growth Collapse'
+            elif dxy_z > THRESHOLD_Z:
+                label = 'Crisis / USD Funding Stress'
+            elif curve_z > THRESHOLD_Z:
+                label = 'Crisis / Flight-to-Quality'
+            else:
+                label = 'High Volatility / Uncertainty'
+        
+        elif move_z < -THRESHOLD_Z:
+            # This state has distinctly lower MOVE than other states
+            if macro_z > THRESHOLD_Z and curve_z > THRESHOLD_Z:
+                label = 'Stable / Reflationary Growth'
+            elif macro_z > THRESHOLD_Z:
+                label = 'Stable / Positive Surprises'
+            elif curve_z < -THRESHOLD_Z:
+                label = 'Stable / Late Cycle'
+            else:
+                label = 'Low Volatility / Risk-On'
+        
+        # PRIORITY 2: USD STRESS
+        elif dxy_z > THRESHOLD_Z:
+            if macro_z < -THRESHOLD_Z:
+                label = 'USD Strength / Growth Divergence'
+            else:
+                label = 'USD Strength / Safe Haven'
+        
+        elif dxy_z < -THRESHOLD_Z:
+            label = 'USD Weakness / Convergence'
+        
+        # PRIORITY 3: MACRO/CURVE
+        elif macro_z > THRESHOLD_Z and curve_z > THRESHOLD_Z:
+            label = 'Growth Acceleration / Reflation'
+        elif macro_z < -THRESHOLD_Z and curve_z < -THRESHOLD_Z:
+            label = 'Slowdown / Flattening'
+        elif macro_z > THRESHOLD_Z:
+            label = 'Positive Surprises'
+        elif macro_z < -THRESHOLD_Z:
+            label = 'Negative Surprises'
+        elif curve_z > THRESHOLD_Z:
+            label = 'Steepening / Easing Expectations'
+        elif curve_z < -THRESHOLD_Z:
+            label = 'Flattening / Tightening'
+        else:
+            label = 'Mixed / Transitional'
+        
+        labels_list.append(label)
+    
+    df_summary['economic_label'] = labels_list
+    
+    return df_summary
 
 
 def compute_regime_persistence(labels: pd.DataFrame) -> pd.DataFrame:
