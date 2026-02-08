@@ -208,16 +208,65 @@ def interpret_states(
         summary['n_days'] = mask.sum()
         summary['pct_days'] = 100 * mask.sum() / len(features)
         
-        # Assign economic label based on feature signature
-        # High MOVE/VIX = stress, High DXY = USD strength, Negative CESI = growth slowdown
-        if means.get('move_chg', 0) > 0.5 and means.get('vix_chg', 0) > 0.5:
-            economic_label = 'Stress / High Volatility'
-        elif means.get('move_chg', 0) < -0.5 and means.get('vix_chg', 0) < -0.5:
-            economic_label = 'Stable / Low Volatility'
-        elif means.get('dxy_chg', 0) > 0.2:
-            economic_label = 'USD Strength / Funding Stress'
-        elif means.get('cesi_usd_zscore', 0) < -0.3:
-            economic_label = 'Growth Slowdown'
+        # Assign economic label based on 4-feature signature
+        # Features: move_chg, dxy_chg, macro_surprise (PC1 of CESI), curve_signal (PC1 of 2s10s)
+        
+        move = means.get('move_chg', 0)
+        dxy = means.get('dxy_chg', 0)
+        macro = means.get('macro_surprise', 0)
+        curve = means.get('curve_signal', 0)
+        
+        # Lower threshold for better sensitivity (features are likely already standardized)
+        THRESHOLD = 0.2
+        
+        # PRIORITY 1: VOLATILITY (most regime-defining)
+        # High volatility = crisis/stress regardless of other factors
+        if move > THRESHOLD:
+            if macro < -THRESHOLD:
+                economic_label = 'Crisis / Growth Collapse'  # GFC, COVID
+            elif dxy > THRESHOLD:
+                economic_label = 'Crisis / USD Funding Stress'
+            elif curve > THRESHOLD:
+                economic_label = 'Crisis / Flight-to-Quality'  # March 2023
+            else:
+                economic_label = 'High Volatility / Uncertainty'  # Trump tariffs?
+        
+        # Low volatility = stable/calm
+        elif move < -THRESHOLD:
+            if macro > THRESHOLD and curve > THRESHOLD:
+                economic_label = 'Stable / Reflationary Growth'
+            elif macro > THRESHOLD:
+                economic_label = 'Stable / Positive Surprises'
+            elif curve < -THRESHOLD:
+                economic_label = 'Stable / Late Cycle'
+            else:
+                economic_label = 'Low Volatility / Risk-On'
+        
+        # PRIORITY 2: USD STRESS (moderate volatility)
+        elif dxy > THRESHOLD:
+            if macro < -THRESHOLD:
+                economic_label = 'USD Strength / Growth Divergence'
+            else:
+                economic_label = 'USD Strength / Safe Haven'
+        
+        elif dxy < -THRESHOLD:
+            economic_label = 'USD Weakness / Convergence'
+        
+        # PRIORITY 3: MACRO/CURVE (normal volatility)
+        elif macro > THRESHOLD and curve > THRESHOLD:
+            economic_label = 'Growth Acceleration / Reflation'
+        elif macro < -THRESHOLD and curve < -THRESHOLD:
+            economic_label = 'Slowdown / Flattening'
+        elif macro > THRESHOLD:
+            economic_label = 'Positive Surprises'
+        elif macro < -THRESHOLD:
+            economic_label = 'Negative Surprises'
+        elif curve > THRESHOLD:
+            economic_label = 'Steepening / Easing Expectations'
+        elif curve < -THRESHOLD:
+            economic_label = 'Flattening / Tightening'
+        
+        # FALLBACK
         else:
             economic_label = 'Mixed / Transitional'
         
