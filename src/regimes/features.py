@@ -140,7 +140,7 @@ def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
 
 def build_regime_features(
         df: pd.DataFrame,
-        start_date: str = '2005-01-01',
+        start_date: str = '2000-01-01',
         zscore_window: int = 252,
         include_fx_vol: bool = True,
         include_curve_slopes: bool = True
@@ -212,6 +212,8 @@ def build_regime_features(
     # CESI rolling z-scores
     cesi_usd_col = 'cesi__CESIUSD Index'
     cesi_eur_col = 'cesi__CESIEUR Index'
+    cesi_jpy_col = 'cesi__CESIJPY Index'
+    cesi_aud_col = 'cesi__CESIAUD Index'
 
     if cesi_usd_col in df.columns:
         features['cesi_usd_zscore'] = rolling_zscore(
@@ -227,6 +229,20 @@ def build_regime_features(
     else:
         raise KeyError(f"CESI EUR not found. Expected column: {cesi_eur_col}")
 
+    if cesi_jpy_col in df.columns:
+        features['cesi_jpy_zscore'] = rolling_zscore(
+            df[cesi_jpy_col], window=zscore_window
+        )
+    else:
+        raise KeyError(f"CESI JPY not found. Expected column: {cesi_jpy_col}")
+    
+    if cesi_aud_col in df.columns:
+        features['cesi_aud_zscore'] = rolling_zscore(
+            df[cesi_aud_col], window=zscore_window
+        )
+    else:
+        raise KeyError(f"CESI AUD not found. Expected column: {cesi_aud_col}")
+    
     # FX implied volatility features
     if include_fx_vol:
         fx_vol = compute_fx_vol_features(df)
