@@ -1,0 +1,5 @@
+column,nobs,adf_p,kpss_p,label
+curve_signal,4847,0.0,0.1,I(0) (stationary)
+dxy_chg,4847,0.0,0.1,I(0) (stationary)
+macro_surprise,4847,1.234486335791686e-13,0.1,I(0) (stationary)
+move_chg,4847,3.1999350356679675e-30,0.1,I(0) (stationary)

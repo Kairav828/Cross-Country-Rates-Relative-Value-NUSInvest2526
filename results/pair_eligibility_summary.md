@@ -8,6 +8,8 @@ Interpretation: even if a pair is RV-neutral under full-sample PCA, frequent PC1
 
 ## Eligible pairs
 
+- **USD-EUR (10Y)** — G1 corr(mean=0.53, std=0.13, p05=0.27); G2 cocluster=73.5%; G3 pc1_diff(full=0.044, low=0.007, high=0.047).
+- **JPY-AUD (10Y)** — G1 corr(mean=0.34, std=0.16, p05=0.00); G2 cocluster=76.4%; G3 pc1_diff(full=0.052, low=0.002, high=0.086).
 - **USD-EUR (5Y)** — G1 corr(mean=0.46, std=0.16, p05=0.06); G2 cocluster=73.5%; G3 pc1_diff(full=0.044, low=0.007, high=0.047).
 - **JPY-AUD (5Y)** — G1 corr(mean=0.30, std=0.12, p05=0.05); G2 cocluster=76.4%; G3 pc1_diff(full=0.052, low=0.002, high=0.086).
 
