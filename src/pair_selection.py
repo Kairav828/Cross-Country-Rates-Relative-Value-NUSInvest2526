@@ -57,6 +57,28 @@ def clean_asset_to_ccy(asset: str) -> str:
         return s[:-3]
     return s
 
+def to_pca_asset_key(asset: str) -> str:
+    """
+    Convert any rolling-corr asset string into the exact PCA key format: 'GT{CCY}5Y Govt'
+    Examples:
+      'GTUSD10Y Govt' -> 'GTUSD5Y Govt'
+      'GTUSD5Y Govt'  -> 'GTUSD5Y Govt'
+    """
+    s = asset.strip()  # remove leading/trailing whitespace
+    s = s.replace(" Govt", "").replace("GT", "")  # now like 'USD10Y' or 'USD5Y'
+
+    # extract ccy and tenor
+    if s.endswith("10Y"):
+        ccy = s[:-3]
+    elif s.endswith("5Y"):
+        ccy = s[:-2]
+    else:
+        # fallback: keep only letters as ccy
+        ccy = "".join([c for c in s if c.isalpha()])
+
+    return f"GT{ccy}5Y Govt"
+
+
 def load_pc1_series(pca_full: pd.DataFrame) -> dict:
     """
     Map asset -> PC1 loading (full sample PCA, 5Y only in this repo).
@@ -99,6 +121,7 @@ THRESH = {
     "pc1_cosine_good_frac": 0.55 # fraction of time above threshold required (repo reality is ~0.57)
 }
 
+print("RUNNING FILE:", __file__)
 
 def main():
     # -----------------------------
@@ -163,22 +186,39 @@ def main():
         coc = cocluster.get((a_ccy, b_ccy), np.nan)
         gate2_pass = (not np.isnan(coc)) and (coc >= THRESH["cocluster_min"])
 
-        # Gate 3 metrics (PCA neutrality, 5Y PCA used as factor proxy)
-        # If PCA file doesn't have this asset (should exist for 5Y), mark NaN.
-        l_full_a = pc1_full.get(a_asset, np.nan)
-        l_full_b = pc1_full.get(b_asset, np.nan)
+        if tenor == "10Y" and a_ccy == "USD" and b_ccy == "EUR":
+            print("RAW:", a_asset, b_asset)
+            print("PCA_KEY:", to_pca_asset_key(a_asset), to_pca_asset_key(b_asset))
+            print("EXISTS_A:", to_pca_asset_key(a_asset) in pc1_full, "EXISTS_B:", to_pca_asset_key(b_asset) in pc1_full)
+            print("LOOKUP_A:", pc1_full.get(to_pca_asset_key(a_asset), None))
+            print("LOOKUP_B:", pc1_full.get(to_pca_asset_key(b_asset), None))
+            print("SAMPLE_KEYS:", list(pc1_full.keys())[:5])
+
+        # -----------------------------
+        # Gate 3: PCA factor neutrality (5Y PCA proxy)
+        # -----------------------------
+        # PCA was run on 5Y assets only. For 10Y pairs, we proxy factor exposure using
+        # the corresponding 5Y assets (same country) because PC1 is "global rates factor"
+        # rather than tenor-specific in our current framework.
+
+        # Always convert both 5Y and 10Y assets into the PCA key format: GT{CCY}5Y Govt
+        a_pca_key = to_pca_asset_key(a_asset)
+        b_pca_key = to_pca_asset_key(b_asset)
+
+        l_full_a = pc1_full.get(a_pca_key, np.nan)
+        l_full_b = pc1_full.get(b_pca_key, np.nan)
         pc1_diff_full = float(abs(l_full_a - l_full_b)) if (not np.isnan(l_full_a) and not np.isnan(l_full_b)) else np.nan
 
-        l_low_a = pc1_low.get(a_asset, np.nan)
-        l_low_b = pc1_low.get(b_asset, np.nan)
+        l_low_a = pc1_low.get(a_pca_key, np.nan)
+        l_low_b = pc1_low.get(b_pca_key, np.nan)
         pc1_diff_low = float(abs(l_low_a - l_low_b)) if (not np.isnan(l_low_a) and not np.isnan(l_low_b)) else np.nan
 
-        l_high_a = pc1_high.get(a_asset, np.nan)
-        l_high_b = pc1_high.get(b_asset, np.nan)
+        l_high_a = pc1_high.get(a_pca_key, np.nan)
+        l_high_b = pc1_high.get(b_pca_key, np.nan)
         pc1_diff_high = float(abs(l_high_a - l_high_b)) if (not np.isnan(l_high_a) and not np.isnan(l_high_b)) else np.nan
 
-        # Gate 3 pass requires neutrality in full sample AND both regime splits (if available)
-        # If a regime split metric is NaN (e.g., if PCA assets missing), treat as fail: we can't defend it.
+        # Gate 3 decision rule: must be neutral in full + low + high vol splits
+        # If we cannot compute diffs (NaN), we treat as fail because we can't defend it.
         gate3_pass = (
             (not np.isnan(pc1_diff_full)) and pc1_diff_full <= THRESH["pc1_diff_full_max"] and
             (not np.isnan(pc1_diff_low)) and pc1_diff_low <= THRESH["pc1_diff_low_max"] and
