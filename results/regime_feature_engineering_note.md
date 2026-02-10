@@ -58,7 +58,7 @@ $$x_{i,t} = \beta_i \xi_t + \epsilon_{i,t}, \quad \epsilon_{i,t} \sim \mathcal{N
 Then PC1 estimates the maximum-variance projection:
 $$\widehat{\xi}_t = \arg\max_{\mathbf{w}} \mathbf{w}^T \text{Cov}(\mathbf{X}) \mathbf{w} \quad \text{s.t.} \quad \|\mathbf{w}\| = 1$$
 
-For regime classification, this recovers the **common component** (global risk-on/risk-off) while discarding country-specific idiosyncrasies.
+For regime classification, this recovers the **common component** (global risk-on/risk-off) while discarding country-specific idiosyncrasies. We interpret PC1 not as a mechanical linear combination, but as an estimated latent ‘global’ factor (global curve shift / synchronized surprises) that is more stable than any single country series.
 
 ### Drawbacks and Limitations
 1. **Information loss**: PC1 captures 32-36% of variance → remainder discarded (may contain regime-relevant country divergences, e.g., EUR-USD policy desynchronization)
