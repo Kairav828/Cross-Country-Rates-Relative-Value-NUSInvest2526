@@ -1,0 +1,4 @@
+question,answer,reason,metric,stress_mean,normal_mean,diff,p_value,direction_tested
+Do relationships weaken in stress regimes?,NOT AVAILABLE,missing rolling_corr_mean,,,,,,
+Does PC1 dominate during stress?,YES,,pc1_variance,0.4219123191980126,0.41509887325034533,0.0068134459476672515,0.0282846032678161,gt
+Do clusters fragment during stress?,NOT AVAILABLE,missing cluster metric,,,,,,
