@@ -22,10 +22,6 @@ Task 3.3 expects DAILY structural series aligned by Date index:
 """
 
 
-# -----------------------------
-# Core helpers (you already had)
-# -----------------------------
-
 def merge_regime_and_structure(df_regimes, df_structure):
     common_idx = df_regimes.index.intersection(df_structure.index)
     return df_regimes.loc[common_idx].join(df_structure.loc[common_idx])
@@ -62,8 +58,6 @@ def plot_regime_boxplots(df_merged, metrics):
     plt.show()
 
 
-# -----------------------------------------
-# NEW: robust loaders for pair-level outputs
 # -----------------------------------------
 
 def _find_date_column(df: pd.DataFrame):
@@ -205,7 +199,7 @@ def load_optional_structure_series(results_dir: Path):
 
 
 # -----------------------------
-# Hypothesis gate helpers (Task 3.3)
+# Hypothesis gate helpers 
 # -----------------------------
 
 def pick_stress_and_normal_regimes(stats_summary, pc1_metric="pc1_variance"):
@@ -236,7 +230,7 @@ def hypothesis_yesno(df_master, metric, stress_regime, normal_regime, direction=
 
 
 # -----------------------------
-# Script runner (so you can run + save before commit)
+# Script runner
 # -----------------------------
 
 def run_task33_validation(results_dir: Path):
