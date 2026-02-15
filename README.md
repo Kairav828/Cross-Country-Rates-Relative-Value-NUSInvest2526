@@ -14,7 +14,7 @@ The core objective is **not unconditional profit maximisation**, but to systemat
 ## What This Project Does
 
 ### Identifies economically coherent cross-country rate relationships
-- Focuses on Japan and Asia-Pacific markets (Korea, Australia, Singapore / China)
+- Universe: China, US, EU, Japan, Australia
 - Motivation:
   - trade linkages  
   - USD funding sensitivity  
