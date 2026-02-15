@@ -133,6 +133,31 @@ To avoid over-fragmenting the downstream modeling, we define:
 
 ---
 
+## Empirical Distribution of Frozen Regimes
+
+From `results/regime_state_summary.csv` and `results/regime_probabilities.csv`:
+
+| State | Economic Label                  | % of Days | # of Days |
+|-------|----------------------------------|-----------|-----------|
+| 0     | Low Volatility / Risk-On        | 30.04%    | 1456      |
+| 1     | Slowdown / Flattening           | 31.71%    | 1537      |
+| 2     | Stable / Positive Surprises     | 30.74%    | 1490      |
+| 3     | Crisis / Flight-to-Quality      | 7.51%     | 364       |
+
+### Observations
+
+- The model does **not collapse into one dominant state** (healthy).
+- Stress regime (State 3) occupies ~7.5% of the sample — consistent with crisis frequency in developed markets.
+- Calm states are roughly evenly distributed, suggesting the model is not overfitting minor feature variation.
+- No state is degenerate (<2%) or dominant (>60%).
+
+This supports that:
+- The HMM solution is economically plausible.
+- The state space is balanced.
+- Regime allocation is not an artifact of initialization.
+
+---
+
 ## How cointegration and kalman filtering must use regimes (hard rules)
 
 ### Label usage
