@@ -8,7 +8,7 @@ from .cointegration import engle_granger_test
 
 def rolling_cointegration(
         y_A: pd.Series,
-        y_B: pd_Series,
+        y_B: pd.Series,
         window: int = 252,
         min_periods: int = 100,
         adf_method: str = 'schwert',
@@ -20,7 +20,7 @@ def rolling_cointegration(
     :param y_A: Yield series with datetime index
     :type y_A: pd.Series
     :param y_B: Yield series with datetime index
-    :type y_B: pd_Series
+    :type y_B: pd.Series
     :param window: Rolling window size (default 252 = ~1 trading year)
     :type window: int
     :param min_periods: Minimum observations required
