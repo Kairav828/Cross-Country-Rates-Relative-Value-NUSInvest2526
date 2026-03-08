@@ -13,3 +13,4 @@ jupyterlab
 pyarrow
 tabulate
 hmmlearn
+filterpy
