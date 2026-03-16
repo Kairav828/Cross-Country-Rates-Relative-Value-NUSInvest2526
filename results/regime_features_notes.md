@@ -31,7 +31,7 @@ We decided to base the feature set based on a couple of high level macro ideas. 
 - For the yield curve signals, we decided to get the PC1 component of the combination of the 2 year-10 year spreads for USD, EUR, AUD, and JPY and represent that as the global yield curve signal
 - For the macro shocks, we decided to get the PC1 component of the combination of the CESI for US, EUR, JP, AU
 
-We felt that narrowing it down to 4 features based on overarching macro ideas with relatively low correlation would imporve our regime persistence and average regime duration. This would ultimately allow for an effective HMM model that would allow make meaningful use of the information provided to trade on.
+We felt that narrowing it down to 4 features based on overarching macro ideas with relatively low correlation would improve our regime persistence and average regime duration. This would ultimately allow for an effective HMM model that would allow make meaningful use of the information provided to trade on.
 
 Another modification to the feature set was adding a scaling component to the standard deviations based on perceived importance of the feature in determining the regimes. Higher weightage was given to MOVE change and lower was given to funding stress. Yield curve and macro surprises were in the middle.
 
