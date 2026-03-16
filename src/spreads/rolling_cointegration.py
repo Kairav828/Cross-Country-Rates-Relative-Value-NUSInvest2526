@@ -36,6 +36,7 @@ def rolling_cointegration(
                 - hedge_ratio_beta
                 - cointegrated
                 - n_obs
+                - r_squared
     :rtype: DataFrame
     """
     df = pd.DataFrame({'y_A': y_A, 'y_B': y_B}).dropna()
