@@ -16,7 +16,7 @@ From the initial feature set, the initial worry was about the stationarity of th
 However upon further testing it was realised that stationarity of the spreads were a red herring. The reason for the weird regime persistence in the HMM is due to the fact that Fed policy decisions were only updated every quarter as opposed to the remaining data being updated daily. Therefore the decision was made to drop the policy spread data as it may negatively affect the HMM.
 
 **Subsequent Trial and Error**
-Expanded the feature set to 11 features, including original factors and the 2year-10year yield spreads for each of the countries we are trading (US-EUR, AUD-JPY), along with the currency overnight FX implied volality to represent foreign exchange volatilities.
+Expanded the feature set to 11 features, including original factors and the 2year-10year yield spreads for each of the countries we are trading (US-EUR, AUD-JPY), along with the currency overnight FX implied volatility to represent foreign exchange volatilities.
 
 The initial exploratory testing of the HMM over the entire 11 features proved to be too volatile due to highly correlated features. This led to too many feature inputs in the HMM which caused low regime persistence and overall sub-optimal results. There were simply too much noise from the feature set and we determined to narrow it down to around 4-5 features that had low correlations to each other.
 
