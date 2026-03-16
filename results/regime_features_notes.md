@@ -1,6 +1,6 @@
 # Struggles
 ## Difference in Data resolution
-When deciding on the features being used for the HMM, owing to the fact that most of the data we have is daily, we would be unable to use features such as policy spreads in the model as it would lead to misinterpreation by the model. This is because policy decisions only update every quarter.
+When deciding on the features being used for the HMM, owing to the fact that most of the data we have is daily, we would be unable to use features such as policy spreads in the model as it would lead to misinterpretation by the model. This is because policy decisions only update every quarter.
 
 Trying to force them into our feature set proved to be a wasted effort, as efforts to difference the spreads, find cycles for the spreads ultimately led to non-persistent regimes that averaged 1-4 days.
 
