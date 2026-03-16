@@ -23,7 +23,11 @@ def get_continuous_regime_periods(
     diffs = int_series.diff()
     
     starts = int_series.index[diffs == 1]
-    ends = int_series.index[diffs == -1]
+    # diffs == -1 marks the first index *after* leaving target_state.
+    # We want the last index that is still in target_state, i.e., the
+    # previous index before the -1 transition.
+    transition_end_pos = np.where(diffs == -1)[0]
+    ends = int_series.index[transition_end_pos - 1]
     
     # Handle edge cases (starts at index 0, ends at index -1)
     if is_state.iloc[0]:
