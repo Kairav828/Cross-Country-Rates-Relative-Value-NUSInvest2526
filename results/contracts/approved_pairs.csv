@@ -1,0 +1,2 @@
+pair_id,y_col,x_col,tenor,ccy_leg_1,ccy_leg_2,tradable_regimes,cointegration_source,status,notes
+USD_EUR_5Y,bond_yields__GTUSD5Y Govt,bond_yields__GTEUR5Y Govt,5Y,USD,EUR,"[2]",notebook_12,approved,"Only cointegrated and tradable pair from current dataset"
