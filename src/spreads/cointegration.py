@@ -1,4 +1,4 @@
-""""
+"""
 Engle-Granger cointegration testing with residual diagnostics.
 """
 import numpy as np
