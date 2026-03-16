@@ -183,7 +183,13 @@ def spell_adf_fisher(
     :type min_spell_obs: int
     :param adf_method: method to determine # lags in adf
     :type adf_method: str
-    :return: TODO
+    :return: Dictionary with regime-conditional cointegration test results, including:
+        - ``valid`` (bool): whether a combined Fisher test was computed (at least one spell met ``min_spell_obs``).
+        - ``reason`` (str): explanation when ``valid`` is ``False``; empty or informational otherwise.
+        - ``fisher_stat`` (float): Fisher combined test statistic from spell-level ADF p-values.
+        - ``fisher_pval`` (float): p-value associated with ``fisher_stat``.
+        - ``n_spells_used`` (int): number of spells contributing to the Fisher combination.
+        - ``spell_results`` (list[dict]): per-spell diagnostics with keys ``start``, ``end``, ``n_obs``, ``adf_stat``, ``adf_pval``.
     :rtype: dict
     """
 
