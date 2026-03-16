@@ -269,7 +269,7 @@ def regime_conditional_cointegration(
     :type y_A: pd.Series
     :param y_B: Yield series with datetime index
     :type y_B: pd.Series
-    :param regime_labels: Regime state lables (0, 1, 2, 3) with datetime index
+    :param regime_labels: Regime state labels (0, 1, 2, 3) with datetime index
     :type regime_labels: pd.Series
     :param min_obs: Minimum observations required per regime
     :type min_obs: int
