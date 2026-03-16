@@ -12,3 +12,5 @@ ipykernel
 jupyterlab
 pyarrow
 tabulate
+hmmlearn
+filterpy
