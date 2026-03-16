@@ -146,7 +146,7 @@ def validate_residuals(
     results['heteroskedastic'] = results['white_pval'] < 0.05
 
     # Ljung-Box test for autocorrelation
-    lb_result = acorr_ljungbox(residuals, lags=[lags], return_df=False)
+    lb_result = acorr_ljungbox(residuals, lags=[lags], return_df=True)
     results['ljung_box_stat'] = lb_result['lb_stat'].iloc[0]
     results['ljung_box_pval'] = lb_result['lb_pvalue'].iloc[0]
     results['autocorrelated'] = results['ljung_box_pval'] < 0.05
