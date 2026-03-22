@@ -141,6 +141,7 @@ def compute_policy_divergence(df: pd.DataFrame) -> pd.DataFrame:
 def build_regime_features(
         df: pd.DataFrame,
         start_date: str = '2000-01-01',
+        end_date: str = '2004-12-31',
         zscore_window: int = 252,
         include_fx_vol: bool = True,
         include_curve_slopes: bool = True
@@ -184,7 +185,7 @@ def build_regime_features(
     - Curve slopes capture recession/reflation regime shifts
     '''
 
-    df = df.loc[start_date:].copy()
+    df = df.loc[start_date:end_date].copy()
 
     features = pd.DataFrame(index=df.index)
 
