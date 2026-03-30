@@ -66,8 +66,13 @@ NB22  Final summary write-up     (research question, methodology, findings, fail
 
 ── Note ──────────────────────────────────────────────────────────────────────
 
-NB13–16 are exploratory prototypes (OLS hedge ratios, OU fitting, signal design)
-and are not part of the active production framework.
+NB13–16 are exploratory prototypes and are NOT part of the active framework.
+NB17 supersedes all of their methods:
+  NB13 (OLS/static hedge ratio)    →  NB17 uses Kalman dynamic hedge ratio
+  NB14 (OU fitting on full sample) →  NB17 tests mean reversion regime-conditionally
+  NB15 (signal design prototype)   →  NB17 generates innovation_z_t walk-forward
+  NB16 (single-pass backtest)      →  NB18–20 are the production backtest engines
+Where any method appears in both NB17 and NB13–16, NB17 is authoritative.
 ```
 
 ---
