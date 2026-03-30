@@ -43,7 +43,7 @@ NB08  Regime robustness          (stability checks on cluster assignments)
 
 ── Active Strategy Framework ─────────────────────────────────────────────────
 
-NB09  Macro feature engineering  (10 features: slope, carry, VIX, USD vol, spread z-score, global PC1)
+NB09  Macro feature engineering  (4 features used in NB17: PC1 slope, MOVE change, BBDXY change, Citi CESI PC1)
   ↓
 NB10  HMM regime estimation      (Gaussian HMM, BIC model selection k = 2–4)
   ↓
@@ -81,7 +81,7 @@ Where any method appears in both NB17 and NB13–16, NB17 is authoritative.
 
 ### 1. Macro Regime Identification (HMM)
 
-A Gaussian Hidden Markov Model is fit on 10 macro features per period: yield curve slope, cross-country spread, 3-month carry change, yield z-score, VIX, USD FX vol, and the global slope PC1. BIC selects the number of states from {2, 3, 4}. Identified states correspond to economically interpretable regimes: low-vol carry, risk-off flight-to-quality, policy divergence, and crisis.
+A Gaussian Hidden Markov Model is fit on 4 macro features per period: PC1 of yield curve slope, MOVE change, BBDXY change, and PC1 of the Citi Economic Surprise Index (EUR & US). BIC selects the number of states from {2, 3, 4}. Identified states correspond to economically interpretable regimes: low-vol carry, risk-off flight-to-quality, policy divergence, and crisis.
 
 HMMs are fit exclusively on training data. Test-window regime labels are inferred via Viterbi on frozen training parameters — no lookahead.
 
@@ -189,7 +189,7 @@ No price prediction models. No black-box ML. Every decision is statistically gro
 ## Repository Structure
 
 ```
-NOTEBOOKS/    Reproducible analysis (NB01–NB22)
+NOTEBOOKS/    Reproducible analysis (NB01–NB12, NB17–NB22; NB13–16 are exploratory only)
 src/          Modular research and trading code
 results/      Output CSVs (regime probabilities, trade ledgers, performance)
 DATA/         Cleaned inputs (raw data excluded)
