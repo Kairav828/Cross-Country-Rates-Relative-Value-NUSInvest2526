@@ -39,22 +39,22 @@ NB04  Seasonality detection      (calendar effects in yield changes)
 NB05  PCA structure              (global factor decomposition)
 NB06  Rolling correlation        (time-varying cross-market co-movement)
 NB07  Clustering                 (k-means regime grouping)
-NB08  Regime robustness          (stability checks on cluster assignments)
+NB08  Regime robustness          (stability checks on HMM assignments)
+NB09  Macro feature engineering  (prototype — superseded by NB17)
+NB10  HMM regime estimation      (prototype — superseded by NB17)
+NB11  Regime validation          (prototype — superseded by NB17)
+NB12  Regime-conditional cointegration screen (prototype — superseded by NB17)
+NB13  OLS/static hedge ratio     (prototype — superseded by NB17)
+NB14  OU fitting on full sample  (prototype — superseded by NB17)
+NB15  Signal design              (prototype — superseded by NB17)
+NB16  Single-pass backtest       (prototype — superseded by NB18–20)
 
 ── Active Strategy Framework ─────────────────────────────────────────────────
 
-NB09  Macro feature engineering  (4 features used in NB17: PC1 slope, MOVE change, BBDXY change, Citi CESI PC1)
-  ↓
-NB10  HMM regime estimation      (Gaussian HMM, BIC model selection k = 2–4)
-  ↓
-NB11  Regime validation          (persistence, economic coherence, event cross-check)
-  ↓
-NB12  Regime-conditional cointegration screen
-                                 (Fisher ADF, AR(1) mean reversion, half-life filter)
-  ↓
-NB17  Walk-forward window generation
-                                 (expanding train windows, Kalman dynamic hedge ratio,
-                                  innovation_z_t signal, regime labels for test windows)
+NB17  Walk-forward pipeline      (features → HMM → cointegration screen →
+                                  Kalman dynamic hedge ratio → innovation_z_t signal
+                                  → regime labels for test windows;
+                                  all fit on training data only, applied forward)
   ↓
 NB18  Fixed-parameter backtest   (Z_entry = 2.0, Z_exit = 0.5)
 NB19  Walk-forward PnL-optimised (grid search, training PnL objective)
@@ -66,13 +66,10 @@ NB22  Final summary write-up     (research question, methodology, findings, fail
 
 ── Note ──────────────────────────────────────────────────────────────────────
 
-NB13–16 are exploratory prototypes and are NOT part of the active framework.
-NB17 supersedes all of their methods:
-  NB13 (OLS/static hedge ratio)    →  NB17 uses Kalman dynamic hedge ratio
-  NB14 (OU fitting on full sample) →  NB17 tests mean reversion regime-conditionally
-  NB15 (signal design prototype)   →  NB17 generates innovation_z_t walk-forward
-  NB16 (single-pass backtest)      →  NB18–20 are the production backtest engines
-Where any method appears in both NB17 and NB13–16, NB17 is authoritative.
+NB09–16 are exploratory prototypes and are NOT part of the active framework.
+NB17 is the authoritative implementation for the entire modelling pipeline
+(feature construction, HMM, cointegration screen, Kalman signal).
+Where any method appears in both NB17 and NB09–16, NB17 governs.
 ```
 
 ---
@@ -189,7 +186,7 @@ No price prediction models. No black-box ML. Every decision is statistically gro
 ## Repository Structure
 
 ```
-NOTEBOOKS/    Reproducible analysis (NB01–NB12, NB17–NB22; NB13–16 are exploratory only)
+NOTEBOOKS/    Reproducible analysis (NB01–NB08, NB17–NB22; NB09–16 are exploratory only)
 src/          Modular research and trading code
 results/      Output CSVs (regime probabilities, trade ledgers, performance)
 DATA/         Cleaned inputs (raw data excluded)

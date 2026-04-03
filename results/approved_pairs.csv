@@ -1,2 +1,2 @@
 pair_id,y_col,x_col,tenor,ccy_leg_1,ccy_leg_2,tradable_regimes,cointegration_source,status,regime,fisher_pval,hedge_ratio,intercept,ar1_alpha,ar1_pval,half_life,median_duration,prob_persistence,is_tradable
-JPY-AUD 5Y,bond_yields__GTJPY5Y Govt,bond_yields__GTAUD5Y Govt,5Y,JPY,AUD,[0],HMM,approved,0,0.04573546732851275,0.25046937735699404,-0.46526540158339286,-0.08326439571437112,9.839884698492965e-11,8.324652747588615,5.0,0.40522875816993464,True
+JPY-AUD 5Y,bond_yields__GTJPY5Y Govt,bond_yields__GTAUD5Y Govt,5Y,JPY,AUD,[0],HMM,approved,0,0.045735467328512525,0.250469377356994,-0.465265401583393,-0.08326439571437107,9.839884698493358e-11,8.32465274758862,5.0,0.40522875816993464,True
